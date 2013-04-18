@@ -1,0 +1,23 @@
+c hash tables:
+
+http://stackoverflow.com/questions/1138742/looking-for-a-good-hash-table-implementation-in-c
+
+libcfu
+uthash
+glib
+sparsehash
+
+http://stackoverflow.com/questions/2192976/does-the-stl-contain-a-hashtable
+
+unordered_map, unordered_set
+
+c avl trees:
+
+libc: tsearch (won't work for our specialized case)
+boost looks good, but our implementation is too specialized, we will need to roll our own.
+
+we need:
+
+a hash table with key: uint32, value: uint32 (fast fetch, fast update)
+an AVL interval tree with key: interval, value: partial sum (find with sum, insert, rebalance)
+
