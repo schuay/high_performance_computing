@@ -23,6 +23,10 @@ uint32_t
 itree_insert(const uint32_t index,
              itree_t **root);
 
+void
+itree_free(itree_t *root);
+
+
 struct __itree_iter_t;
 typedef struct __itree_iter_t itree_iter_t;
 

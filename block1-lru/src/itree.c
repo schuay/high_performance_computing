@@ -17,6 +17,19 @@ itree_insert(const uint32_t index,
     return 0;
 }
 
+void
+itree_free(itree_t *root)
+{
+    if (root == NULL) {
+        return;
+    }
+
+    itree_free(root->l);
+    itree_free(root->r);
+
+    free(root);
+}
+
 #define ITER_PUSH(iter, val) do { iter->stack[iter->top++] = val; } while(0);
 #define ITER_POP(iter) (iter->stack[--iter->top])
 
