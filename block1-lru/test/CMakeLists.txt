@@ -3,6 +3,6 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src
 )
 
-add_executable(itree_test itree.c)
+add_executable(itree_test itree.c ${CMAKE_SOURCE_DIR}/src/itree.c)
 target_link_libraries(itree_test ${CHECK_LIBRARIES})
 add_test(itree_test ${CMAKE_CURRENT_BINARY_DIR}/itree_test)
