@@ -4,6 +4,16 @@
 
 #include "itree.h"
 
+#define CHK_NODE(n, k1cond, k2cond, vcond, lcond, rcond) \
+do { \
+    fail_unless(n != NULL); \
+    fail_unless(n->k1 k1cond); \
+    fail_unless(n->k2 k2cond); \
+    fail_unless(n->v vcond); \
+    fail_unless(n->l lcond); \
+    fail_unless(n->r rcond); \
+} while(0);
+
 START_TEST(test_iter_next1)
 {
     itree_t t1 = { NULL, NULL, 0, 0, 0 };
@@ -31,7 +41,130 @@ END_TEST
 
 START_TEST(test_insert_into_empty)
 {
-    fail_unless(1 == 1);
+    itree_t *root = NULL;
+    itree_insert(10, &root);
+    CHK_NODE(root, == 10, == 10, == 0, == NULL, == NULL);
+    itree_free(root);
+}
+END_TEST
+
+START_TEST(test_insert_adjacent1l)
+{
+    itree_t *root = NULL;
+    itree_insert(10, &root);
+    itree_insert(9, &root);
+    CHK_NODE(root, == 9, == 10, == 0, == NULL, == NULL);
+    itree_free(root);
+}
+END_TEST
+
+START_TEST(test_insert_adjacent1r)
+{
+    itree_t *root = NULL;
+    itree_insert(10, &root);
+    itree_insert(11, &root);
+    CHK_NODE(root, == 10, == 11, == 0, == NULL, == NULL);
+    itree_free(root);
+}
+END_TEST
+
+START_TEST(test_insert_not_adjacentl)
+{
+    itree_t *root = NULL;
+    itree_insert(10, &root);
+    itree_insert(8, &root);
+    CHK_NODE(root, == 10, == 10, == 0, != NULL, == NULL);
+    itree_t *l = root->l;
+    CHK_NODE(l, == 8, == 8, == 0, == NULL, == NULL);
+    itree_free(root);
+}
+END_TEST
+
+START_TEST(test_insert_not_adjacentr)
+{
+    itree_t *root = NULL;
+    itree_insert(10, &root);
+    itree_insert(12, &root);
+    CHK_NODE(root, == 10, == 10, == 1, == NULL, != NULL);
+    itree_t *r = root->r;
+    CHK_NODE(r, == 12, == 12, == 0, == NULL, == NULL);
+    itree_free(root);
+}
+END_TEST
+
+START_TEST(test_insert_balance1)
+{
+    itree_t *root = NULL;
+    itree_insert(10, &root);
+    itree_insert(15, &root);
+    itree_insert(13, &root);
+    CHK_NODE(root, == 13, == 13, == 1, != NULL, != NULL);
+    itree_t *l = root->l;
+    CHK_NODE(l, == 10, == 10, == 0, == NULL, == NULL);
+    itree_t *r = root->r;
+    CHK_NODE(r, == 15, == 15, == 0, == NULL, == NULL);
+    itree_free(root);
+}
+END_TEST
+
+START_TEST(test_insert_balance2)
+{
+    itree_t *root = NULL;
+    itree_insert(15, &root);
+    itree_insert(10, &root);
+    itree_insert(13, &root);
+    CHK_NODE(root, == 13, == 13, == 1, != NULL, != NULL);
+    itree_t *l = root->l;
+    CHK_NODE(l, == 10, == 10, == 0, == NULL, == NULL);
+    itree_t *r = root->r;
+    CHK_NODE(r, == 15, == 15, == 0, == NULL, == NULL);
+    itree_free(root);
+}
+END_TEST
+
+START_TEST(test_insert_adjacent2)
+{
+    itree_t *root = NULL;
+    itree_insert(10, &root);
+    itree_insert(12, &root);
+    itree_insert(11, &root);
+    CHK_NODE(root, == 10, == 12, == 0, == NULL, == NULL);
+    itree_free(root);
+}
+END_TEST
+
+START_TEST(test_insert_adjacent2_balance1)
+{
+    itree_t *root = NULL;
+    itree_insert(15, &root);
+    itree_insert(9, &root);
+    itree_insert(13, &root);
+    itree_insert(11, &root);
+    CHK_NODE(root, == 13, == 13, == 1, != NULL, != NULL);
+    itree_t *l = root->l;
+    CHK_NODE(l, == 9, == 9, == 1, == NULL, != NULL);
+    itree_t *lr = l->r;
+    CHK_NODE(lr, == 11, == 11, == 0, == NULL, == NULL);
+    itree_t *r = root->r;
+    CHK_NODE(r, == 15, == 15, == 0, == NULL, == NULL);
+    itree_free(root);
+}
+END_TEST
+
+START_TEST(test_insert_adjacent2_balance2)
+{
+    itree_t *root = NULL;
+    itree_insert(15, &root);
+    itree_insert(9, &root);
+    itree_insert(13, &root);
+    itree_insert(11, &root);
+    itree_insert(12, &root);
+    CHK_NODE(root, == 11, == 13, == 1, != NULL, != NULL);
+    itree_t *l = root->l;
+    CHK_NODE(l, == 9, == 9, == 0, == NULL, == NULL);
+    itree_t *r = root->r;
+    CHK_NODE(r, == 15, == 15, == 0, == NULL, == NULL);
+    itree_free(root);
 }
 END_TEST
 
@@ -42,7 +175,16 @@ create_suite(void)
     TCase *tc_core = tcase_create("core");
 
     tcase_add_test(tc_core, test_insert_into_empty);
+    tcase_add_test(tc_core, test_insert_adjacent1l);
+    tcase_add_test(tc_core, test_insert_adjacent1r);
+    tcase_add_test(tc_core, test_insert_not_adjacentl);
+    tcase_add_test(tc_core, test_insert_not_adjacentr);
+    tcase_add_test(tc_core, test_insert_adjacent2);
     tcase_add_test(tc_core, test_iter_next1);
+    tcase_add_test(tc_core, test_insert_balance1);
+    tcase_add_test(tc_core, test_insert_balance2);
+    tcase_add_test(tc_core, test_insert_adjacent2_balance1);
+    tcase_add_test(tc_core, test_insert_adjacent2_balance2);
 
     suite_add_tcase(s, tc_core);
 
