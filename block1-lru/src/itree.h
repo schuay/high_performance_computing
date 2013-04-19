@@ -7,6 +7,10 @@
  * An AVL tree with closed, mutually disjunct uint32_t intervals as keys and
  * uint32_t values representing the index count in the right subtree (the
  * interval [5, 7] counts as 3 indices).
+ *
+ * For further information, see the Tree of Holes in Almasi, Cascaval and
+ * Padua. Calculating stack distances efficiently. SIG-PLAN Not. 38, 2
+ * supplement (June 2002), 37-43.
  */
 
 typedef struct __itree_t {
