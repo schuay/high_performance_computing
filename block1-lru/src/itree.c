@@ -13,20 +13,20 @@ struct __itree_iter_t {
 
 
 static int
-itree_insert_internal(const uint32_t index,
-                      itree_t **root,
-                      uint32_t *holes);
+_itree_insert(const uint32_t index,
+              itree_t **root,
+              uint32_t *holes);
 
 int
 itree_insert(const uint32_t index,
                       itree_t **root,
                       uint32_t *holes)
 {
-    return itree_insert_internal(index, root, holes);
+    return _itree_insert(index, root, holes);
 }
 
 static int
-itree_insert_internal(const uint32_t index,
+_itree_insert(const uint32_t index,
                       itree_t **root,
                       uint32_t *holes)
 {
@@ -53,9 +53,9 @@ itree_insert_internal(const uint32_t index,
 
     /* Descend into left or right subtree. */
     if (droot->k1 > index) {
-        itree_insert_internal(index, &droot->l, holes);
+        return _itree_insert(index, &droot->l, holes);
     } else if (index > droot->k2) {
-        itree_insert_internal(index, &droot->r, holes);
+        return _itree_insert(index, &droot->r, holes);
     }
 
     return 0;
