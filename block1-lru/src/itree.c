@@ -4,8 +4,14 @@
 #include <stdio.h>
 #include <string.h>
 
+
+/* itree defines. */
+
 #define MAX(l, r) (((l) > (r)) ? (l) : (r))
 #define MAX_H(l, r) MAX((l == NULL) ? 0 : l->h, (r == NULL) ? 0 : r->h)
+
+
+/* itree structs. */
 
 struct __itree_iter_t {
     const itree_t *root;        /**< The root of the iterated tree. */
@@ -15,6 +21,8 @@ struct __itree_iter_t {
 };
 
 
+/* itree declarations. */
+
 static int
 _itree_insert(const uint32_t index,
               itree_t **root,
@@ -22,6 +30,9 @@ _itree_insert(const uint32_t index,
 static int
 _itree_new_node(const uint32_t index,
                       itree_t **root);
+
+
+/* itree definitions. */
 
 int
 itree_insert(const uint32_t index,
@@ -94,8 +105,14 @@ itree_free(itree_t *root)
     free(root);
 }
 
+
+/* itree_iter defines. */
+
 #define ITER_PUSH(iter, val) do { iter->stack[iter->top++] = val; } while(0);
 #define ITER_POP(iter) (iter->stack[--iter->top])
+
+
+/* itree_iter definitions. */
 
 itree_iter_t *
 itree_iter_init(const itree_t *root)
