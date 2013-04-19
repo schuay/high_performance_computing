@@ -4,7 +4,7 @@
 
 #include "itree.h"
 
-#define CHK_NODE(n, k1cond, k2cond, vcond, lcond, rcond) \
+#define CHK_NODE(n, k1cond, k2cond, vcond, lcond, rcond, hcond) \
 do { \
     fail_unless(n != NULL); \
     fail_unless(n->k1 k1cond); \
@@ -12,17 +12,18 @@ do { \
     fail_unless(n->v vcond); \
     fail_unless(n->l lcond); \
     fail_unless(n->r rcond); \
+    fail_unless(n->h hcond); \
 } while(0);
 
 START_TEST(test_iter_next1)
 {
-    itree_t t1 = { NULL, NULL, 0, 0, 0 };
-    itree_t t2 = { NULL, NULL, 0, 0, 0 };
-    itree_t t3 = { &t2, NULL, 0, 0, 0 };
-    itree_t t4 = { &t1, &t3, 0, 0, 0 };
-    itree_t t5 = { NULL, NULL, 0, 0, 0 };
-    itree_t t6 = { NULL, &t5, 0, 0, 0 };
-    itree_t t7 = { &t4, &t6, 0, 0, 0 };
+    itree_t t1 = { NULL, NULL, 0, 0, 0, 0 };
+    itree_t t2 = { NULL, NULL, 0, 0, 0, 0 };
+    itree_t t3 = { &t2, NULL, 0, 0, 0, 0 };
+    itree_t t4 = { &t1, &t3, 0, 0, 0, 0 };
+    itree_t t5 = { NULL, NULL, 0, 0, 0, 0 };
+    itree_t t6 = { NULL, &t5, 0, 0, 0, 0 };
+    itree_t t7 = { &t4, &t6, 0, 0, 0, 0 };
 
     itree_iter_t *iter = itree_iter_init(&t7);
 
@@ -45,7 +46,7 @@ START_TEST(test_insert_into_empty)
     uint32_t holes;
     fail_unless(itree_insert(10, &root, &holes) == 0);
     fail_unless(holes == 0);
-    CHK_NODE(root, == 10, == 10, == 0, == NULL, == NULL);
+    CHK_NODE(root, == 10, == 10, == 0, == NULL, == NULL, == 0);
     itree_free(root);
 }
 END_TEST
@@ -57,7 +58,7 @@ START_TEST(test_insert_adjacent1l)
     fail_unless(itree_insert(10, &root, &holes) == 0);
     fail_unless(itree_insert(9, &root, &holes) == 0);
     fail_unless(holes == 1);
-    CHK_NODE(root, == 9, == 10, == 0, == NULL, == NULL);
+    CHK_NODE(root, == 9, == 10, == 0, == NULL, == NULL, == 0);
     itree_free(root);
 }
 END_TEST
@@ -69,7 +70,7 @@ START_TEST(test_insert_adjacent1r)
     fail_unless(itree_insert(10, &root, &holes) == 0);
     fail_unless(itree_insert(11, &root, &holes) == 0);
     fail_unless(holes == 0);
-    CHK_NODE(root, == 10, == 11, == 0, == NULL, == NULL);
+    CHK_NODE(root, == 10, == 11, == 0, == NULL, == NULL, == 0);
     itree_free(root);
 }
 END_TEST
@@ -81,9 +82,9 @@ START_TEST(test_insert_not_adjacentl)
     fail_unless(itree_insert(10, &root, &holes) == 0);
     fail_unless(itree_insert(8, &root, &holes) == 0);
     fail_unless(holes == 1);
-    CHK_NODE(root, == 10, == 10, == 0, != NULL, == NULL);
+    CHK_NODE(root, == 10, == 10, == 0, != NULL, == NULL, == 1);
     itree_t *l = root->l;
-    CHK_NODE(l, == 8, == 8, == 0, == NULL, == NULL);
+    CHK_NODE(l, == 8, == 8, == 0, == NULL, == NULL, == 0);
     itree_free(root);
 }
 END_TEST
@@ -95,9 +96,9 @@ START_TEST(test_insert_not_adjacentr)
     fail_unless(itree_insert(10, &root, &holes) == 0);
     fail_unless(itree_insert(12, &root, &holes) == 0);
     fail_unless(holes == 0);
-    CHK_NODE(root, == 10, == 10, == 1, == NULL, != NULL);
+    CHK_NODE(root, == 10, == 10, == 1, == NULL, != NULL, == 1);
     itree_t *r = root->r;
-    CHK_NODE(r, == 12, == 12, == 0, == NULL, == NULL);
+    CHK_NODE(r, == 12, == 12, == 0, == NULL, == NULL, == 0);
     itree_free(root);
 }
 END_TEST
@@ -110,11 +111,11 @@ START_TEST(test_insert_balance1)
     fail_unless(itree_insert(15, &root, &holes) == 0);
     fail_unless(itree_insert(13, &root, &holes) == 0);
     fail_unless(holes == 1);
-    CHK_NODE(root, == 13, == 13, == 1, != NULL, != NULL);
+    CHK_NODE(root, == 13, == 13, == 1, != NULL, != NULL, == 1);
     itree_t *l = root->l;
-    CHK_NODE(l, == 10, == 10, == 0, == NULL, == NULL);
+    CHK_NODE(l, == 10, == 10, == 0, == NULL, == NULL, == 0);
     itree_t *r = root->r;
-    CHK_NODE(r, == 15, == 15, == 0, == NULL, == NULL);
+    CHK_NODE(r, == 15, == 15, == 0, == NULL, == NULL, == 0);
     itree_free(root);
 }
 END_TEST
@@ -127,11 +128,11 @@ START_TEST(test_insert_balance2)
     fail_unless(itree_insert(10, &root, &holes) == 0);
     fail_unless(itree_insert(13, &root, &holes) == 0);
     fail_unless(holes == 1);
-    CHK_NODE(root, == 13, == 13, == 1, != NULL, != NULL);
+    CHK_NODE(root, == 13, == 13, == 1, != NULL, != NULL, == 1);
     itree_t *l = root->l;
-    CHK_NODE(l, == 10, == 10, == 0, == NULL, == NULL);
+    CHK_NODE(l, == 10, == 10, == 0, == NULL, == NULL, == 0);
     itree_t *r = root->r;
-    CHK_NODE(r, == 15, == 15, == 0, == NULL, == NULL);
+    CHK_NODE(r, == 15, == 15, == 0, == NULL, == NULL, == 0);
     itree_free(root);
 }
 END_TEST
@@ -144,7 +145,7 @@ START_TEST(test_insert_adjacent2)
     fail_unless(itree_insert(12, &root, &holes) == 0);
     fail_unless(itree_insert(11, &root, &holes) == 0);
     fail_unless(holes == 1);
-    CHK_NODE(root, == 10, == 12, == 0, == NULL, == NULL);
+    CHK_NODE(root, == 10, == 12, == 0, == NULL, == NULL, == 0);
     itree_free(root);
 }
 END_TEST
@@ -158,13 +159,13 @@ START_TEST(test_insert_adjacent2_balance1)
     fail_unless(itree_insert(13, &root, &holes) == 0);
     fail_unless(itree_insert(11, &root, &holes) == 0);
     fail_unless(holes == 2);
-    CHK_NODE(root, == 13, == 13, == 1, != NULL, != NULL);
+    CHK_NODE(root, == 13, == 13, == 1, != NULL, != NULL, == 2);
     itree_t *l = root->l;
-    CHK_NODE(l, == 9, == 9, == 1, == NULL, != NULL);
+    CHK_NODE(l, == 9, == 9, == 1, == NULL, != NULL, == 1);
     itree_t *lr = l->r;
-    CHK_NODE(lr, == 11, == 11, == 0, == NULL, == NULL);
+    CHK_NODE(lr, == 11, == 11, == 0, == NULL, == NULL, == 0);
     itree_t *r = root->r;
-    CHK_NODE(r, == 15, == 15, == 0, == NULL, == NULL);
+    CHK_NODE(r, == 15, == 15, == 0, == NULL, == NULL, == 0);
     itree_free(root);
 }
 END_TEST
@@ -179,11 +180,11 @@ START_TEST(test_insert_adjacent2_balance2)
     fail_unless(itree_insert(11, &root, &holes) == 0);
     fail_unless(itree_insert(12, &root, &holes) == 0);
     fail_unless(holes == 2);
-    CHK_NODE(root, == 11, == 13, == 1, != NULL, != NULL);
+    CHK_NODE(root, == 11, == 13, == 1, != NULL, != NULL, == 1);
     itree_t *l = root->l;
-    CHK_NODE(l, == 9, == 9, == 0, == NULL, == NULL);
+    CHK_NODE(l, == 9, == 9, == 0, == NULL, == NULL, == 0);
     itree_t *r = root->r;
-    CHK_NODE(r, == 15, == 15, == 0, == NULL, == NULL);
+    CHK_NODE(r, == 15, == 15, == 0, == NULL, == NULL, == 0);
     itree_free(root);
 }
 END_TEST

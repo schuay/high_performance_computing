@@ -17,6 +17,8 @@ typedef struct __itree_t {
     struct __itree_t *l, *r;    /**< The left and right child nodes. */
     uint32_t k1, k2;            /**< The key interval [k1, k2]. */
     uint32_t v;                 /**< The # of elements in the right subtree. */
+    uint8_t h;                  /**< The height of this node. height(node without
+                                 *   children) == 0. */
 } itree_t;
 
 /**
