@@ -36,9 +36,26 @@ itree_free(itree_t *root);
 struct __itree_iter_t;
 typedef struct __itree_iter_t itree_iter_t;
 
+/* Sets up the iterator to traverse the tree pointed to by root
+ * inorder. Returns NULL on error.
+ *
+ * Precondition:
+ *  * The tree must have a depth <= 32.
+ *  * root != NULL.
+ *
+ * Postconditions:
+ *  * The iterator is ready to use.
+ */
 itree_iter_t *
 itree_iter_init(const itree_t *root);
 
+/**
+ * Returns the next node of the tree, or NULL if the end has been
+ * reached.
+ *
+ * Precondition:
+ *  * iter != NULL.
+ */
 const itree_t *
 itree_iter_next(itree_iter_t *iter);
 
