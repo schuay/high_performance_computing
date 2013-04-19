@@ -18,6 +18,12 @@ typedef struct __itree_t {
 /**
  * Inserts a new index into the tree and returns the # of indices in the
  * tree larger than the new index.
+ *
+ * Preconditions:
+ *  * Index must not be in the tree.
+ *
+ * Postconditions:
+ *  * Index is in the tree.
  */
 uint32_t
 itree_insert(const uint32_t index,

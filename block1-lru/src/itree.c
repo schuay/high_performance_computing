@@ -10,11 +10,50 @@ struct __itree_iter_t {
     int top;                    /**< The current top stack index. */
 };
 
+
+static void
+itree_insert_internal(const uint32_t index,
+                      itree_t **root);
+
 uint32_t
 itree_insert(const uint32_t index,
              itree_t **root)
 {
+    itree_insert_internal(index, root);
     return 0;
+}
+
+static void
+itree_insert_internal(const uint32_t index,
+                      itree_t **root)
+{
+    itree_t *droot = *root;
+
+    /* New node. */
+    if (droot == NULL) {
+        droot = calloc(1, sizeof(itree_t));
+        if (droot == NULL) {
+            /* TODO: Error. */
+        }
+        droot->k1 = index;
+        droot->k2 = index;
+        *root = droot;
+        return;
+    }
+
+    /* Already inserted. */
+    if (droot->k1 <= index && index <= droot->k2) {
+        /* TODO: Error. */
+    }
+
+    /* Descend into left or right subtree. */
+    if (droot->k1 > index) {
+        itree_insert_internal(index, &droot->l);
+        return;
+    } else if (index > droot->k2) {
+        itree_insert_internal(index, &droot->r);
+        return;
+    }
 }
 
 void
