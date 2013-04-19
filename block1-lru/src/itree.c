@@ -55,20 +55,15 @@ _itree_insert(const uint32_t index,
         return _itree_new_node(index, root);
     }
 
-    /* Already inserted. */
-    if (droot->k1 <= index && index <= droot->k2) {
-        fprintf(stderr, "Index %d is already in tree\n", index);
-        return -1;
-    }
-
     /* Descend into left or right subtree. */
     if (droot->k1 > index) {
         return _itree_insert(index, &droot->l, holes);
     } else if (index > droot->k2) {
         return _itree_insert(index, &droot->r, holes);
+    } else {
+        fprintf(stderr, "Index %d is already in tree\n", index);
+        return -1;
     }
-
-    return 0;
 }
 
 void
