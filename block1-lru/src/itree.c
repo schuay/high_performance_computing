@@ -1,5 +1,6 @@
 #include "itree.h"
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,7 +32,9 @@ _itree_insert(const uint32_t index,
 static int
 _itree_new_node(const uint32_t index,
                       itree_t **root);
-
+static void
+_itree_extend_node(const uint32_t index,
+                   itree_t *node);
 
 /* itree definitions. */
 
@@ -59,6 +62,29 @@ _itree_new_node(const uint32_t index,
 }
 
 /**
+ * Extends node by adding index to the node interval.
+ *
+ * Preconditions:
+ *  * node != NULL.
+ *  * index is immediately adjacent to the node interval.
+ *
+ * Postconditions:
+ *  * The node interval has been extended by index.
+ */
+static void
+_itree_extend_node(const uint32_t index,
+                   itree_t *node)
+{
+    assert(index == node->k1 - 1 || node->k2 + 1 == index);
+
+    if (index < node->k1) {
+        node->k1 = index;
+    } else {
+        node->k2 = index;
+    }
+}
+
+/**
  * The workhorse for itree_insert.
  * Adjacent points to the most recent node passed with an interval immediately
  * adjacent to index (such as [1, 3] for index 4) and is used for combining
@@ -72,6 +98,13 @@ _itree_insert(const uint32_t index,
 {
     int ret = 0;
     itree_t *droot = *root;
+
+    /* Add to existing adjacent node. */
+    if (droot == NULL && adjacent != NULL) {
+        *holes = 0;
+        _itree_extend_node(index, adjacent);
+        return 0;
+    }
 
     /* New node. */
     if (droot == NULL) {
