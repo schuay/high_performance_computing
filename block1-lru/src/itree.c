@@ -118,13 +118,30 @@ _itree_insert(const uint32_t index,
         ret = _itree_insert(index, &droot->l, holes, adj);
         if (ret != 0) { return ret; }
 
-        *holes += droot->v + droot->k2 - droot->k1 + 1;
+        if (adj != NULL && adj == droot) {
+            /* This node has been extended. */
+            *holes = droot->v + droot->k2 - index;
+        } else {
+            /* One of our ancestor nodes has been extended, OR
+             * index was added as a new descendant node. */
+            *holes += droot->v + droot->k2 - droot->k1 + 1;
+        }
+
         droot->h = MAX_H(droot->l, droot->r) + 1;
     } else if (index > droot->k2) {
-        droot->v++;
         itree_t *adj = (droot->k2 == index - 1) ? droot : adjacent;
         ret = _itree_insert(index, &droot->r, holes, adj);
         if (ret != 0) { return ret; }
+
+        if (adj != NULL && adj != droot) {
+            /* One of our ancestor nodes has been extended. */
+        } else if (adj != NULL && adj == droot) {
+            /* This node has been extended. */
+            *holes = droot->v + droot->k2 - index;
+        } else {
+            /* Index was added as a new descendant node. */
+            droot->v++;
+        }
 
         droot->h = MAX_H(droot->l, droot->r) + 1;
     } else {
