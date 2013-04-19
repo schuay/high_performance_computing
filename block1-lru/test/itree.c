@@ -15,6 +15,46 @@ do { \
     fail_unless(n->h hcond); \
 } while(0);
 
+#define TEST_SINGLE_EXTENSION(insert, expected_holes) \
+START_TEST(test_insert_single_extension_holes##insert) \
+{ \
+    itree_t *root = dense_tree_with_interval(3); \
+    uint32_t holes; \
+    fail_unless(itree_insert(insert, &root, &holes) == 0); \
+    fail_unless(holes == expected_holes); \
+    itree_free(root); \
+} \
+END_TEST
+
+/**
+ * Creates a dense tree without need for rebalancing with 
+ * depth 3 (= 15 nodes). Each node has a singleton interval
+ * which is separated from the next closest intervals by
+ * the interval argument.
+ */
+static itree_t *
+dense_tree_with_interval(int interval)
+{
+    itree_t *root = NULL;
+    uint32_t holes;
+    fail_unless(itree_insert(8 * interval, &root, &holes) == 0);
+    fail_unless(itree_insert(4 * interval, &root, &holes) == 0);
+    fail_unless(itree_insert(12 * interval, &root, &holes) == 0);
+    fail_unless(itree_insert(2 * interval, &root, &holes) == 0);
+    fail_unless(itree_insert(6 * interval, &root, &holes) == 0);
+    fail_unless(itree_insert(10 * interval, &root, &holes) == 0);
+    fail_unless(itree_insert(14 * interval, &root, &holes) == 0);
+    fail_unless(itree_insert(1 * interval, &root, &holes) == 0);
+    fail_unless(itree_insert(3 * interval, &root, &holes) == 0);
+    fail_unless(itree_insert(5 * interval, &root, &holes) == 0);
+    fail_unless(itree_insert(7 * interval, &root, &holes) == 0);
+    fail_unless(itree_insert(9 * interval, &root, &holes) == 0);
+    fail_unless(itree_insert(11 * interval, &root, &holes) == 0);
+    fail_unless(itree_insert(13 * interval, &root, &holes) == 0);
+    fail_unless(itree_insert(15 * interval, &root, &holes) == 0);
+    return root;
+}
+
 START_TEST(test_iter_next1)
 {
     itree_t t1 = { NULL, NULL, 0, 0, 0, 0 };
@@ -189,6 +229,37 @@ START_TEST(test_insert_adjacent2_balance2)
 }
 END_TEST
 
+TEST_SINGLE_EXTENSION(2, 15)
+TEST_SINGLE_EXTENSION(4, 14)
+TEST_SINGLE_EXTENSION(5, 14)
+TEST_SINGLE_EXTENSION(7, 13)
+TEST_SINGLE_EXTENSION(8, 13)
+TEST_SINGLE_EXTENSION(10, 12)
+TEST_SINGLE_EXTENSION(11, 12)
+TEST_SINGLE_EXTENSION(13, 11)
+TEST_SINGLE_EXTENSION(14, 11)
+TEST_SINGLE_EXTENSION(16, 10)
+TEST_SINGLE_EXTENSION(17, 10)
+TEST_SINGLE_EXTENSION(19, 9)
+TEST_SINGLE_EXTENSION(20, 9)
+TEST_SINGLE_EXTENSION(22, 8)
+TEST_SINGLE_EXTENSION(23, 8)
+TEST_SINGLE_EXTENSION(25, 7)
+TEST_SINGLE_EXTENSION(26, 7)
+TEST_SINGLE_EXTENSION(28, 6)
+TEST_SINGLE_EXTENSION(29, 6)
+TEST_SINGLE_EXTENSION(31, 5)
+TEST_SINGLE_EXTENSION(32, 5)
+TEST_SINGLE_EXTENSION(34, 4)
+TEST_SINGLE_EXTENSION(35, 4)
+TEST_SINGLE_EXTENSION(37, 3)
+TEST_SINGLE_EXTENSION(38, 3)
+TEST_SINGLE_EXTENSION(40, 2)
+TEST_SINGLE_EXTENSION(41, 2)
+TEST_SINGLE_EXTENSION(43, 1)
+TEST_SINGLE_EXTENSION(44, 1)
+TEST_SINGLE_EXTENSION(46, 0)
+
 static Suite *
 create_suite(void)
 {
@@ -207,7 +278,40 @@ create_suite(void)
     tcase_add_test(tc_core, test_insert_adjacent2_balance1);
     tcase_add_test(tc_core, test_insert_adjacent2_balance2);
 
+    TCase *tc_sext = tcase_create("sext");
+    tcase_add_test(tc_sext, test_insert_single_extension_holes2);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes4);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes5);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes7);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes8);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes10);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes11);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes13);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes14);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes16);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes17);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes19);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes20);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes22);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes23);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes25);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes26);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes28);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes29);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes31);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes32);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes34);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes35);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes37);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes38);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes40);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes41);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes43);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes44);
+    tcase_add_test(tc_sext, test_insert_single_extension_holes46);
+
     suite_add_tcase(s, tc_core);
+    suite_add_tcase(s, tc_sext);
 
     return s;
 }
