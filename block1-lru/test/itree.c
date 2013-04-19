@@ -26,6 +26,17 @@ START_TEST(test_insert_single_extension_holes##insert) \
 } \
 END_TEST
 
+#define TEST_DOUBLE_EXTENSION(insert, expected_holes) \
+START_TEST(test_insert_double_extension_holes##insert) \
+{ \
+    itree_t *root = dense_tree_with_interval(2); \
+    uint32_t holes; \
+    fail_unless(itree_insert(insert, &root, &holes) == 0); \
+    fail_unless(holes == expected_holes); \
+    itree_free(root); \
+} \
+END_TEST
+
 /**
  * Creates a dense tree without need for rebalancing with 
  * depth 3 (= 15 nodes). Each node has a singleton interval
@@ -260,6 +271,23 @@ TEST_SINGLE_EXTENSION(43, 1)
 TEST_SINGLE_EXTENSION(44, 1)
 TEST_SINGLE_EXTENSION(46, 0)
 
+TEST_DOUBLE_EXTENSION(1, 15)
+TEST_DOUBLE_EXTENSION(3, 14)
+TEST_DOUBLE_EXTENSION(5, 13)
+TEST_DOUBLE_EXTENSION(7, 12)
+TEST_DOUBLE_EXTENSION(9, 11)
+TEST_DOUBLE_EXTENSION(11, 10)
+TEST_DOUBLE_EXTENSION(13, 9)
+TEST_DOUBLE_EXTENSION(15, 8)
+TEST_DOUBLE_EXTENSION(17, 7)
+TEST_DOUBLE_EXTENSION(19, 6)
+TEST_DOUBLE_EXTENSION(21, 5)
+TEST_DOUBLE_EXTENSION(23, 4)
+TEST_DOUBLE_EXTENSION(25, 3)
+TEST_DOUBLE_EXTENSION(27, 2)
+TEST_DOUBLE_EXTENSION(29, 1)
+TEST_DOUBLE_EXTENSION(31, 0)
+
 static Suite *
 create_suite(void)
 {
@@ -310,8 +338,27 @@ create_suite(void)
     tcase_add_test(tc_sext, test_insert_single_extension_holes44);
     tcase_add_test(tc_sext, test_insert_single_extension_holes46);
 
+    TCase *tc_dext = tcase_create("dext");
+    tcase_add_test(tc_sext, test_insert_double_extension_holes1);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes3);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes5);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes7);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes9);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes11);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes13);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes15);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes17);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes19);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes21);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes23);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes25);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes27);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes29);
+    tcase_add_test(tc_sext, test_insert_double_extension_holes31);
+
     suite_add_tcase(s, tc_core);
     suite_add_tcase(s, tc_sext);
+    suite_add_tcase(s, tc_dext);
 
     return s;
 }
