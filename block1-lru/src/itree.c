@@ -60,10 +60,13 @@ _itree_insert(const uint32_t index,
     /* Descend into left or right subtree. */
     if (droot->k1 > index) {
         ret = _itree_insert(index, &droot->l, holes);
+        if (ret != 0) { return ret; }
+
         *holes += droot->v + droot->k2 - droot->k1 + 1;
     } else if (index > droot->k2) {
         droot->v++;
         ret = _itree_insert(index, &droot->r, holes);
+        if (ret != 0) { return ret; }
     } else {
         fprintf(stderr, "Index %d is already in tree\n", index);
         return -1;
