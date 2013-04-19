@@ -16,18 +16,21 @@ typedef struct __itree_t {
 } itree_t;
 
 /**
- * Inserts a new index into the tree and returns the # of indices in the
- * tree larger than the new index.
+ * Inserts a new index into the tree and writes the # of indices in the
+ * tree larger than the new index into holes. Returns 0 on success, < 0
+ * on error.
  *
  * Preconditions:
  *  * Index must not be in the tree.
+ *  * holes != NULL.
  *
  * Postconditions:
  *  * Index is in the tree.
  */
-uint32_t
+int
 itree_insert(const uint32_t index,
-             itree_t **root);
+             itree_t **root,
+             uint32_t *holes);
 
 void
 itree_free(itree_t *root);

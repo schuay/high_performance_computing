@@ -1,6 +1,7 @@
 #include "itree.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 struct __itree_iter_t {
@@ -11,21 +12,23 @@ struct __itree_iter_t {
 };
 
 
-static void
+static int
 itree_insert_internal(const uint32_t index,
-                      itree_t **root);
+                      itree_t **root,
+                      uint32_t *holes);
 
-uint32_t
+int
 itree_insert(const uint32_t index,
-             itree_t **root)
+                      itree_t **root,
+                      uint32_t *holes)
 {
-    itree_insert_internal(index, root);
-    return 0;
+    return itree_insert_internal(index, root, holes);
 }
 
-static void
+static int
 itree_insert_internal(const uint32_t index,
-                      itree_t **root)
+                      itree_t **root,
+                      uint32_t *holes)
 {
     itree_t *droot = *root;
 
@@ -33,27 +36,29 @@ itree_insert_internal(const uint32_t index,
     if (droot == NULL) {
         droot = calloc(1, sizeof(itree_t));
         if (droot == NULL) {
-            /* TODO: Error. */
+            perror("calloc");
+            return -1;
         }
         droot->k1 = index;
         droot->k2 = index;
         *root = droot;
-        return;
+        return 0;
     }
 
     /* Already inserted. */
     if (droot->k1 <= index && index <= droot->k2) {
-        /* TODO: Error. */
+        fprintf(stderr, "Index %d is already in tree\n", index);
+        return -1;
     }
 
     /* Descend into left or right subtree. */
     if (droot->k1 > index) {
-        itree_insert_internal(index, &droot->l);
-        return;
+        itree_insert_internal(index, &droot->l, holes);
     } else if (index > droot->k2) {
-        itree_insert_internal(index, &droot->r);
-        return;
+        itree_insert_internal(index, &droot->r, holes);
     }
+
+    return 0;
 }
 
 void
