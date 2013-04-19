@@ -81,14 +81,16 @@ _itree_insert(const uint32_t index,
 
     /* Descend into left or right subtree. */
     if (droot->k1 > index) {
-        ret = _itree_insert(index, &droot->l, holes, adjacent);
+        itree_t *adj = (droot->k1 == index + 1) ? droot : adjacent;
+        ret = _itree_insert(index, &droot->l, holes, adj);
         if (ret != 0) { return ret; }
 
         *holes += droot->v + droot->k2 - droot->k1 + 1;
         droot->h = MAX_H(droot->l, droot->r) + 1;
     } else if (index > droot->k2) {
         droot->v++;
-        ret = _itree_insert(index, &droot->r, holes, adjacent);
+        itree_t *adj = (droot->k2 == index - 1) ? droot : adjacent;
+        ret = _itree_insert(index, &droot->r, holes, adj);
         if (ret != 0) { return ret; }
 
         droot->h = MAX_H(droot->l, droot->r) + 1;
