@@ -16,6 +16,9 @@ static int
 _itree_insert(const uint32_t index,
               itree_t **root,
               uint32_t *holes);
+static int
+_itree_new_node(const uint32_t index,
+                      itree_t **root);
 
 int
 itree_insert(const uint32_t index,
@@ -23,6 +26,21 @@ itree_insert(const uint32_t index,
                       uint32_t *holes)
 {
     return _itree_insert(index, root, holes);
+}
+
+static int
+_itree_new_node(const uint32_t index,
+                      itree_t **root)
+{
+    itree_t *droot = calloc(1, sizeof(itree_t));
+    if (droot == NULL) {
+        perror("calloc");
+        return -1;
+    }
+    droot->k1 = index;
+    droot->k2 = index;
+    *root = droot;
+    return 0;
 }
 
 static int
@@ -34,15 +52,7 @@ _itree_insert(const uint32_t index,
 
     /* New node. */
     if (droot == NULL) {
-        droot = calloc(1, sizeof(itree_t));
-        if (droot == NULL) {
-            perror("calloc");
-            return -1;
-        }
-        droot->k1 = index;
-        droot->k2 = index;
-        *root = droot;
-        return 0;
+        return _itree_new_node(index, root);
     }
 
     /* Already inserted. */
