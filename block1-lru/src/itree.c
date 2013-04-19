@@ -26,7 +26,8 @@ struct __itree_iter_t {
 static int
 _itree_insert(const uint32_t index,
               itree_t **root,
-              uint32_t *holes);
+              uint32_t *holes,
+              itree_t *adjacent);
 static int
 _itree_new_node(const uint32_t index,
                       itree_t **root);
@@ -39,7 +40,7 @@ itree_insert(const uint32_t index,
                       itree_t **root,
                       uint32_t *holes)
 {
-    return _itree_insert(index, root, holes);
+    return _itree_insert(index, root, holes, NULL);
 }
 
 static int
@@ -57,10 +58,17 @@ _itree_new_node(const uint32_t index,
     return 0;
 }
 
+/**
+ * The workhorse for itree_insert.
+ * Adjacent points to the most recent node passed with an interval immediately
+ * adjacent to index (such as [1, 3] for index 4) and is used for combining
+ * intervals.
+ */
 static int
 _itree_insert(const uint32_t index,
                       itree_t **root,
-                      uint32_t *holes)
+                      uint32_t *holes,
+                      itree_t *adjacent)
 {
     int ret = 0;
     itree_t *droot = *root;
@@ -73,14 +81,14 @@ _itree_insert(const uint32_t index,
 
     /* Descend into left or right subtree. */
     if (droot->k1 > index) {
-        ret = _itree_insert(index, &droot->l, holes);
+        ret = _itree_insert(index, &droot->l, holes, adjacent);
         if (ret != 0) { return ret; }
 
         *holes += droot->v + droot->k2 - droot->k1 + 1;
         droot->h = MAX_H(droot->l, droot->r) + 1;
     } else if (index > droot->k2) {
         droot->v++;
-        ret = _itree_insert(index, &droot->r, holes);
+        ret = _itree_insert(index, &droot->r, holes, adjacent);
         if (ret != 0) { return ret; }
 
         droot->h = MAX_H(droot->l, droot->r) + 1;
