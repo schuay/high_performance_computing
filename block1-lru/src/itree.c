@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#define MAX(l, r) (((l) > (r)) ? (l) : (r))
+#define MAX_H(l, r) MAX((l == NULL) ? 0 : l->h, (r == NULL) ? 0 : r->h)
+
 struct __itree_iter_t {
     const itree_t *root;        /**< The root of the iterated tree. */
     const itree_t *stack[32];   /**< The node stack. Tree depth cannot exceed 32
@@ -63,10 +66,13 @@ _itree_insert(const uint32_t index,
         if (ret != 0) { return ret; }
 
         *holes += droot->v + droot->k2 - droot->k1 + 1;
+        droot->h = MAX_H(droot->l, droot->r) + 1;
     } else if (index > droot->k2) {
         droot->v++;
         ret = _itree_insert(index, &droot->r, holes);
         if (ret != 0) { return ret; }
+
+        droot->h = MAX_H(droot->l, droot->r) + 1;
     } else {
         fprintf(stderr, "Index %d is already in tree\n", index);
         return -1;
