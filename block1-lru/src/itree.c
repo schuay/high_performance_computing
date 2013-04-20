@@ -9,6 +9,7 @@
 /* itree defines. */
 
 #define MAX(l, r) (((l) > (r)) ? (l) : (r))
+#define INDENT (2)
 
 
 /* itree structs. */
@@ -27,6 +28,9 @@ typedef struct {
 
 /* itree declarations. */
 
+static void
+_itree_print(const itree_t *root,
+             uint8_t level);
 static int
 _itree_insert(const uint32_t index,
               itree_t **root,
@@ -79,6 +83,27 @@ itree_insert(const uint32_t index,
     }
 
     return ret;
+}
+
+void
+itree_print(const itree_t *root)
+{
+    _itree_print(root, 0);
+}
+
+static void
+_itree_print(const itree_t *root,
+             uint8_t level)
+{
+    if (root == NULL) {
+        return;
+    }
+
+    printf("%*s{ k: [%d, %d], v: %d, h: %d }\n", level * INDENT, "", root->k1,
+           root->k2, root->v, root->h);
+
+    _itree_print(root->l, level + 1);
+    _itree_print(root->r, level + 1);
 }
 
 static int

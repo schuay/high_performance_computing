@@ -39,6 +39,9 @@ itree_insert(const uint32_t index,
              uint32_t *holes);
 
 void
+itree_print(const itree_t *root);
+
+void
 itree_free(itree_t *root);
 
 
