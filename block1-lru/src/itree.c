@@ -39,6 +39,16 @@ _itree_new_node(const uint32_t index,
 static void
 _itree_extend_node(const uint32_t index,
                    itree_t *node);
+static int
+_itree_descend_l(const uint32_t index,
+                 itree_t **root,
+                 uint32_t *holes,
+                 itree_util_t *util);
+static int
+_itree_descend_r(const uint32_t index,
+                 itree_t **root,
+                 uint32_t *holes,
+                 itree_util_t *util);
 
 /* itree definitions. */
 
@@ -90,6 +100,71 @@ _itree_extend_node(const uint32_t index,
     }
 }
 
+static int
+_itree_descend_l(const uint32_t index,
+                 itree_t **root,
+                 uint32_t *holes,
+                 itree_util_t *util)
+{
+    itree_t *droot = *root;
+
+    if (droot->k1 == index + 1) {
+        if (util->u == NULL) {
+            util->u = droot;
+        } else {
+            /* TODO: Double merge. */
+        }
+    }
+    int ret = _itree_insert(index, &droot->l, holes, util);
+    if (ret != 0) { return ret; }
+
+    if (util->u != NULL && util->u == droot) {
+        /* This node has been extended. */
+        *holes = droot->v + droot->k2 - index;
+    } else {
+        /* One of our ancestor nodes has been extended, OR
+         * index was added as a new descendant node. */
+        *holes += droot->v + droot->k2 - droot->k1 + 1;
+    }
+
+    droot->h = MAX_H(droot->l, droot->r) + 1;
+
+    return 0;
+}
+
+static int
+_itree_descend_r(const uint32_t index,
+                 itree_t **root,
+                 uint32_t *holes,
+                 itree_util_t *util)
+{
+    itree_t *droot = *root;
+
+    if (droot->k2 == index - 1) {
+        if (util->u == NULL) {
+            util->u = droot;
+        } else {
+            /* TODO: Double merge. */
+        }
+    }
+    int ret = _itree_insert(index, &droot->r, holes, util);
+    if (ret != 0) { return ret; }
+
+    if (util->u != NULL && util->u != droot) {
+        /* One of our ancestor nodes has been extended. */
+    } else if (util->u != NULL && util->u == droot) {
+        /* This node has been extended. */
+        *holes = droot->v + droot->k2 - index;
+    } else {
+        /* Index was added as a new descendant node. */
+        droot->v++;
+    }
+
+    droot->h = MAX_H(droot->l, droot->r) + 1;
+
+    return 0;
+}
+
 /**
  * The workhorse for itree_insert.
  * Util keeps track of several internal variables needed for merging nodes.
@@ -100,7 +175,6 @@ _itree_insert(const uint32_t index,
                       uint32_t *holes,
                       itree_util_t *util)
 {
-    int ret = 0;
     itree_t *droot = *root;
 
     /* Add to existing adjacent node. */
@@ -118,54 +192,15 @@ _itree_insert(const uint32_t index,
 
     /* Descend into left or right subtree. */
     if (droot->k1 > index) {
-        if (droot->k1 == index + 1) {
-            if (util->u == NULL) {
-                util->u = droot;
-            } else {
-                /* TODO: Double merge. */
-            }
-        }
-        ret = _itree_insert(index, &droot->l, holes, util);
-        if (ret != 0) { return ret; }
-
-        if (util->u != NULL && util->u == droot) {
-            /* This node has been extended. */
-            *holes = droot->v + droot->k2 - index;
-        } else {
-            /* One of our ancestor nodes has been extended, OR
-             * index was added as a new descendant node. */
-            *holes += droot->v + droot->k2 - droot->k1 + 1;
-        }
-
-        droot->h = MAX_H(droot->l, droot->r) + 1;
+        return _itree_descend_l(index, root, holes, util);
     } else if (index > droot->k2) {
-        if (droot->k2 == index - 1) {
-            if (util->u == NULL) {
-                util->u = droot;
-            } else {
-                /* TODO: Double merge. */
-            }
-        }
-        ret = _itree_insert(index, &droot->r, holes, util);
-        if (ret != 0) { return ret; }
-
-        if (util->u != NULL && util->u != droot) {
-            /* One of our ancestor nodes has been extended. */
-        } else if (util->u != NULL && util->u == droot) {
-            /* This node has been extended. */
-            *holes = droot->v + droot->k2 - index;
-        } else {
-            /* Index was added as a new descendant node. */
-            droot->v++;
-        }
-
-        droot->h = MAX_H(droot->l, droot->r) + 1;
+        return _itree_descend_r(index, root, holes, util);
     } else {
         fprintf(stderr, "Index %d is already in tree\n", index);
         return -1;
     }
 
-    return ret;
+    return 0;
 }
 
 void
