@@ -62,7 +62,14 @@ itree_insert(const uint32_t index,
 {
     itree_util_t util;
     memset(&util, 0, sizeof(itree_util_t));
-    return _itree_insert(index, root, holes, &util);
+
+    int ret = _itree_insert(index, root, holes, &util);
+
+    if (util.l != NULL) {
+        free(util.l);
+    }
+
+    return ret;
 }
 
 static int
