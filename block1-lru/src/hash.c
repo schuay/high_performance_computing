@@ -24,7 +24,21 @@ hash_insert(hash_t *hash,
             const uint32_t in,
             uint32_t *out)
 {
-    return -1;
+    hash_entry_t *e = malloc(sizeof(hash_entry_t));
+    if (e == NULL) {
+        return -1;
+    }
+
+    e->k = key;
+    e->v = in;
+
+    hash_entry_t *d;
+    HASH_REPLACE(hh, hash->h, k, sizeof(e->k), e, d);
+
+    *out = (d == NULL) ? HASH_NOT_FOUND : d->v;
+    free(d);
+
+    return 0;
 }
 
 void
