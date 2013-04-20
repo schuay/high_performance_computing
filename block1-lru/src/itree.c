@@ -9,7 +9,6 @@
 /* itree defines. */
 
 #define MAX(l, r) (((l) > (r)) ? (l) : (r))
-#define MAX_H(l, r) MAX((l == NULL) ? 0 : l->h, (r == NULL) ? 0 : r->h)
 
 
 /* itree structs. */
@@ -44,6 +43,8 @@ _itree_merge_nodes(itree_t *upper,
                    itree_t *lower);
 static void
 _itree_rebalance(itree_t **root);
+static inline int8_t
+_itree_height(const itree_t *node);
 static int
 _itree_descend_l(const uint32_t index,
                  itree_t **root,
@@ -136,6 +137,12 @@ _itree_merge_nodes(itree_t *upper,
     } else {
         upper->k2 = lower->k2;
     }
+}
+
+static inline int8_t
+_itree_height(const itree_t *node)
+{
+    return (node == NULL) ? -1 : node->h;
 }
 
 static void
@@ -255,7 +262,7 @@ _itree_insert(const uint32_t index,
     /* Rebalance if necessary. */
     _itree_rebalance(root);
 
-    droot->h = MAX_H(droot->l, droot->r) + 1;
+    droot->h = MAX(_itree_height(droot->l), _itree_height(droot->r)) + 1;
 
     return ret;
 }
