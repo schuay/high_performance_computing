@@ -1,5 +1,5 @@
 add_executable(lru-misses
-    main.c
+    lru-misses.c
 )
 
 add_executable(gentrace
