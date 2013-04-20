@@ -156,6 +156,11 @@ _itree_descend_l(const uint32_t index,
     int ret = _itree_insert(index, &droot->l, holes, util);
     if (ret != 0) { return ret; }
 
+    /* Remove the lower node. */
+    if (util->l != NULL && util->l == droot->l) {
+        droot->l = util->l->r;
+    }
+
     droot->h = MAX_H(droot->l, droot->r) + 1;
 
     return 0;
@@ -184,6 +189,11 @@ _itree_descend_r(const uint32_t index,
 
     int ret = _itree_insert(index, &droot->r, holes, util);
     if (ret != 0) { return ret; }
+
+    /* Remove the lower node. */
+    if (util->l != NULL && util->l == droot->r) {
+        droot->r = util->l->l;
+    }
 
     droot->h = MAX_H(droot->l, droot->r) + 1;
 
