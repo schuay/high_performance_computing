@@ -204,6 +204,8 @@ _itree_rebalance(itree_t **root)
 
             droot->r->v += r->v + r->k2 - r->k1 + 1;
 
+            _itree_set_height(r);
+
             r = droot->r;
         }
 
@@ -215,7 +217,8 @@ _itree_rebalance(itree_t **root)
 
         droot->v = _itree_count(droot->r);
 
-        droot = r;
+        _itree_set_height(droot);
+        _itree_set_height(r);
     } else {
         itree_t *l = droot->l;
 
@@ -230,6 +233,8 @@ _itree_rebalance(itree_t **root)
 
             l->v = _itree_count(l->r);
 
+            _itree_set_height(l);
+
             l = droot->l;
         }
 
@@ -241,7 +246,8 @@ _itree_rebalance(itree_t **root)
 
         l->v += droot->v + droot->k2 - droot->k1 + 1;
 
-        droot = l;
+        _itree_set_height(droot);
+        _itree_set_height(l);
     }
 }
 
