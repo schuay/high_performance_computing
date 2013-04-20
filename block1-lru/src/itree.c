@@ -209,6 +209,31 @@ _itree_rebalance(itree_t **root)
 
         droot = r;
     } else {
+        itree_t *l = droot->l;
+
+        const int llh = _itree_height(l->l);
+        const int lrh = _itree_height(l->r);
+
+        /* Left-right case. */
+        if (lrh > llh) {
+            droot->l = l->r;
+            l->r = droot->l->l;
+            droot->l->l = l;
+
+            l->v = _itree_count(l->r);
+
+            l = droot->l;
+        }
+
+        /* Left-left case. */
+
+        droot->l = l->r;
+        l->r = droot;
+        *root = l;
+
+        l->v += droot->v + droot->k2 - droot->k1 + 1;
+
+        droot = l;
     }
 }
 
