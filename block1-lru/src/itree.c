@@ -42,6 +42,8 @@ _itree_extend_node(const uint32_t index,
 static void
 _itree_merge_nodes(itree_t *upper,
                    itree_t *lower);
+static void
+_itree_rebalance(itree_t **root);
 static int
 _itree_descend_l(const uint32_t index,
                  itree_t **root,
@@ -136,6 +138,11 @@ _itree_merge_nodes(itree_t *upper,
     }
 }
 
+static void
+_itree_rebalance(itree_t **root)
+{
+}
+
 static int
 _itree_descend_l(const uint32_t index,
                  itree_t **root,
@@ -160,8 +167,6 @@ _itree_descend_l(const uint32_t index,
     if (util->l != NULL && util->l == droot->l) {
         droot->l = util->l->r;
     }
-
-    droot->h = MAX_H(droot->l, droot->r) + 1;
 
     return 0;
 }
@@ -200,8 +205,6 @@ _itree_descend_r(const uint32_t index,
         droot->v -= util->l->v + util->l->k2 - util->l->k1 + 1;
     }
 
-    droot->h = MAX_H(droot->l, droot->r) + 1;
-
     return 0;
 }
 
@@ -216,6 +219,7 @@ _itree_insert(const uint32_t index,
                       itree_util_t *util)
 {
     itree_t *droot = *root;
+    int ret = 0;
 
     /* Merge two existing nodes. */
     if (droot == NULL && util->l != NULL) {
@@ -236,15 +240,24 @@ _itree_insert(const uint32_t index,
 
     /* Descend into left or right subtree. */
     if (droot->k1 > index) {
-        return _itree_descend_l(index, root, holes, util);
+        if ((ret = _itree_descend_l(index, root, holes, util)) != 0) {
+            return ret;
+        }
     } else if (index > droot->k2) {
-        return _itree_descend_r(index, root, holes, util);
+        if ((ret = _itree_descend_r(index, root, holes, util)) != 0) {
+            return ret;
+        }
     } else {
         fprintf(stderr, "Index %d is already in tree\n", index);
         return -1;
     }
 
-    return 0;
+    /* Rebalance if necessary. */
+    _itree_rebalance(root);
+
+    droot->h = MAX_H(droot->l, droot->r) + 1;
+
+    return ret;
 }
 
 void
