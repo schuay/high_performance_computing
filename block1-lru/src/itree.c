@@ -39,6 +39,9 @@ _itree_new_node(const uint32_t index,
 static void
 _itree_extend_node(const uint32_t index,
                    itree_t *node);
+static void
+_itree_merge_nodes(itree_t *upper,
+                   itree_t *lower);
 static int
 _itree_descend_l(const uint32_t index,
                  itree_t **root,
@@ -100,6 +103,30 @@ _itree_extend_node(const uint32_t index,
     }
 }
 
+/**
+ * Merges lower into upper. Lower is *not* deleted.
+ *
+ * Preconditions:
+ *  * lower, upper != NULL.
+ *  * upper->k2 + 1 == lower->k1 - 1 OR
+ *    upper->k1 - 1 == lower->k2 + 1
+ *
+ * Postconditions:
+ *  * The nodes are merged.
+ */
+static void
+_itree_merge_nodes(itree_t *upper,
+                   itree_t *lower)
+{
+    assert(upper->k2 + 1 == lower->k1 - 1 || upper->k1 - 1 == lower->k2 + 1);
+
+    if (upper->k1 > lower->k2) {
+        upper->k1 = lower->k1;
+    } else {
+        upper->k2 = lower->k2;
+    }
+}
+
 static int
 _itree_descend_l(const uint32_t index,
                  itree_t **root,
@@ -112,7 +139,7 @@ _itree_descend_l(const uint32_t index,
         if (util->u == NULL) {
             util->u = droot;
         } else {
-            /* TODO: Double merge. */
+            util->l = droot;
         }
     }
     int ret = _itree_insert(index, &droot->l, holes, util);
@@ -144,7 +171,7 @@ _itree_descend_r(const uint32_t index,
         if (util->u == NULL) {
             util->u = droot;
         } else {
-            /* TODO: Double merge. */
+            util->l = droot;
         }
     }
     int ret = _itree_insert(index, &droot->r, holes, util);
@@ -176,6 +203,13 @@ _itree_insert(const uint32_t index,
                       itree_util_t *util)
 {
     itree_t *droot = *root;
+
+    /* Merge two existing nodes. */
+    if (droot == NULL && util->l != NULL) {
+        *holes = 0;
+        _itree_merge_nodes(util->u, util->l);
+        return 0;
+    }
 
     /* Add to existing adjacent node. */
     if (droot == NULL && util->u != NULL) {
