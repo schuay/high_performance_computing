@@ -45,6 +45,8 @@ static void
 _itree_rebalance(itree_t **root);
 static inline int8_t
 _itree_height(const itree_t *node);
+static inline uint32_t
+_itree_count(const itree_t *root);
 static int
 _itree_descend_l(const uint32_t index,
                  itree_t **root,
@@ -145,9 +147,69 @@ _itree_height(const itree_t *node)
     return (node == NULL) ? -1 : node->h;
 }
 
+/**
+ * Returns the count of elements in the tree.
+ */
+static inline uint32_t
+_itree_count(const itree_t *root)
+{
+    if (root == NULL) {
+        return 0;
+    }
+    return root->v + _itree_count(root->l);
+}
+
+/**
+ * Rebalances the subtree.
+ *
+ * Precondition:
+ *  * root != NULL.
+ *  * The subtrees root->l and root->r are balanced.
+ *
+ * Postcondition:
+ *  * The subtree is balanced but otherwise unchanged.
+ */
 static void
 _itree_rebalance(itree_t **root)
 {
+    itree_t *droot = *root;
+
+    const int lh = _itree_height(droot->l);
+    const int rh = _itree_height(droot->r);
+    
+    if (abs(lh - rh) < 2) {
+        /* No rebalancing required. */
+        return;
+    }
+
+    if (lh < rh) {
+        itree_t *r = droot->r;
+
+        const int rlh = _itree_height(r->l);
+        const int rrh = _itree_height(r->r);
+
+        /* Right-left case. */
+        if (rlh > rrh) {
+            droot->r = r->l;
+            r->l = droot->r->r;
+            droot->r->r = r;
+
+            droot->r->v += r->v + r->k2 - r->k1 + 1;
+
+            r = droot->r;
+        }
+
+        /* Right-right case. */
+
+        droot->r = r->l;
+        r->l = droot;
+        *root = r;
+
+        droot->v = _itree_count(droot->r);
+
+        droot = r;
+    } else {
+    }
 }
 
 static int
