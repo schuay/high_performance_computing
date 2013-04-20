@@ -5,6 +5,15 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "stackdist.h"
+
+static void
+stackdist_callback(uint64_t index,
+                   uint64_t distance)
+{
+    printf("%llu: %llu\n", (long long unsigned)index, (long long unsigned)distance);
+}
+
 static void
 usage(void)
 {
@@ -37,7 +46,8 @@ main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    /* Do smart things here. */
+    const int n = sb.st_size / sizeof(uint64_t);
+    stackdist_process_trace(p, n, stackdist_callback);
 
     if (munmap(p, sb.st_size) == -1) {
         perror("munmap");
