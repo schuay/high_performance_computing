@@ -63,6 +63,8 @@ itree_insert(const uint32_t index,
     itree_util_t util;
     memset(&util, 0, sizeof(itree_util_t));
 
+    *holes = 0;
+
     int ret = _itree_insert(index, root, holes, &util);
 
     if (util.l != NULL) {
@@ -142,6 +144,8 @@ _itree_descend_l(const uint32_t index,
 {
     itree_t *droot = *root;
 
+    *holes += droot->v + droot->k2 - droot->k1 + 1;
+
     if (droot->k1 == index + 1) {
         if (util->u == NULL) {
             util->u = droot;
@@ -151,15 +155,6 @@ _itree_descend_l(const uint32_t index,
     }
     int ret = _itree_insert(index, &droot->l, holes, util);
     if (ret != 0) { return ret; }
-
-    if (util->u != NULL && util->u == droot) {
-        /* This node has been extended. */
-        *holes = droot->v + droot->k2 - index;
-    } else {
-        /* One of our ancestor nodes has been extended, OR
-         * index was added as a new descendant node. */
-        *holes += droot->v + droot->k2 - droot->k1 + 1;
-    }
 
     droot->h = MAX_H(droot->l, droot->r) + 1;
 
@@ -181,18 +176,14 @@ _itree_descend_r(const uint32_t index,
             util->l = droot;
         }
     }
-    int ret = _itree_insert(index, &droot->r, holes, util);
-    if (ret != 0) { return ret; }
 
-    if (util->u != NULL && util->u != droot) {
-        /* One of our ancestor nodes has been extended. */
-    } else if (util->u != NULL && util->u == droot) {
-        /* This node has been extended. */
-        *holes = droot->v + droot->k2 - index;
-    } else {
-        /* Index was added as a new descendant node. */
+    /* Index was added as a new descendant node. */
+    if (util->u == NULL && util->u != droot) {
         droot->v++;
     }
+
+    int ret = _itree_insert(index, &droot->r, holes, util);
+    if (ret != 0) { return ret; }
 
     droot->h = MAX_H(droot->l, droot->r) + 1;
 
@@ -213,21 +204,18 @@ _itree_insert(const uint32_t index,
 
     /* Merge two existing nodes. */
     if (droot == NULL && util->l != NULL) {
-        *holes = 0;
         _itree_merge_nodes(util->u, util->l);
         return 0;
     }
 
     /* Add to existing adjacent node. */
     if (droot == NULL && util->u != NULL) {
-        *holes = 0;
         _itree_extend_node(index, util->u);
         return 0;
     }
 
     /* New node. */
     if (droot == NULL) {
-        *holes = 0;
         return _itree_new_node(index, root);
     }
 
