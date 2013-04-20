@@ -15,7 +15,7 @@ struct __hash_t {
 hash_t *
 hash_init(void)
 {
-    return NULL;
+    return calloc(1, sizeof(hash_t));
 }
 
 int
@@ -30,4 +30,12 @@ hash_insert(hash_t *hash,
 void
 hash_free(hash_t *hash)
 {
+    hash_entry_t *curr, *tmp;
+
+    HASH_ITER(hh, hash->h, curr, tmp) {
+        HASH_DEL(hash->h, curr);
+        free(curr);
+    }
+
+    free(hash);
 }
