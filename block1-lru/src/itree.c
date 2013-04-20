@@ -45,6 +45,8 @@ static void
 _itree_rebalance(itree_t **root);
 static inline int8_t
 _itree_height(const itree_t *node);
+static inline void
+_itree_set_height(itree_t *node);
 static inline uint32_t
 _itree_count(const itree_t *root);
 static int
@@ -145,6 +147,12 @@ static inline int8_t
 _itree_height(const itree_t *node)
 {
     return (node == NULL) ? -1 : node->h;
+}
+
+static inline void
+_itree_set_height(itree_t *node)
+{
+    node->h = MAX(_itree_height(node->l), _itree_height(node->r)) + 1;
 }
 
 /**
@@ -349,7 +357,7 @@ _itree_insert(const uint32_t index,
     /* Rebalance if necessary. */
     _itree_rebalance(root);
 
-    droot->h = MAX(_itree_height(droot->l), _itree_height(droot->r)) + 1;
+    _itree_set_height(droot);
 
     return ret;
 }
