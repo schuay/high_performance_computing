@@ -18,6 +18,6 @@ boost looks good, but our implementation is too specialized, we will need to rol
 
 we need:
 
-a hash table with key: uint32, value: uint32 (fast fetch, fast update)
+a hash table with key: uint64, value: uint64 (fast fetch, fast update)
 an AVL interval tree with key: interval, value: partial sum (find with sum, insert, rebalance)
 

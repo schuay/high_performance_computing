@@ -21,26 +21,26 @@ usage(void)
 int
 main(int argc, char **argv)
 {
-    uint32_t seed = 0, domain = 0, count = 0;
+    uint64_t seed = 0, domain = 0, count = 0;
     int mode = MODE_BINARY;
 
     int opt;
     while ((opt = getopt(argc, argv, "s:m:n:p")) != -1) {
         switch (opt) {
             case 's':
-                seed = strtol(optarg, NULL, 10);
+                seed = strtoull(optarg, NULL, 10);
                 if (errno != 0) {
                     usage();
                 }
                 break;
             case 'm':
-                domain = strtol(optarg, NULL, 10);
+                domain = strtoull(optarg, NULL, 10);
                 if (errno != 0) {
                     usage();
                 }
                 break;
             case 'n':
-                count = strtol(optarg, NULL, 10);
+                count = strtoull(optarg, NULL, 10);
                 if (errno != 0) {
                     usage();
                 }
@@ -64,12 +64,12 @@ main(int argc, char **argv)
     srand(seed);
 
     if (mode == MODE_PRINT) {
-        for (uint32_t i = 0; i < count; i++) {
-            printf("%u\n", rand() % domain);
+        for (uint64_t i = 0; i < count; i++) {
+            printf("%llu\n", (unsigned long long)(rand() % domain));
         }
     } else if (mode == MODE_BINARY) {
-        for (uint32_t i = 0; i < count; i++) {
-            uint32_t next = rand() % domain;
+        for (uint64_t i = 0; i < count; i++) {
+            uint64_t next = rand() % domain;
             fwrite(&next, sizeof(next), 1, stdout);
         }
         fflush(stdout);

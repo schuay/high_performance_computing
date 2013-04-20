@@ -14,7 +14,7 @@ END_TEST
 
 START_TEST(test_insert1)
 {
-    uint32_t out;
+    uint64_t out;
     hash_t *h;
     fail_unless((h = hash_init()) != NULL);
     fail_unless(hash_insert(h, 1, 1, &out) == 0);
@@ -25,7 +25,7 @@ END_TEST
 
 START_TEST(test_insert2)
 {
-    uint32_t out;
+    uint64_t out;
     hash_t *h;
     fail_unless((h = hash_init()) != NULL);
     fail_unless(hash_insert(h, 1, 1, &out) == 0);
@@ -37,7 +37,7 @@ END_TEST
 
 START_TEST(test_insert3)
 {
-    uint32_t out;
+    uint64_t out;
     hash_t *h;
     fail_unless((h = hash_init()) != NULL);
     fail_unless(hash_insert(h, 1, 1, &out) == 0);
@@ -53,7 +53,7 @@ END_TEST
 
 START_TEST(test_insert4)
 {
-    uint32_t out;
+    uint64_t out;
     hash_t *h;
     fail_unless((h = hash_init()) != NULL);
     fail_unless(hash_insert(h, 1, 1, &out) == 0);

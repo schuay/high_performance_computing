@@ -3,8 +3,8 @@
 #include "uthash.h"
 
 typedef struct {
-    uint32_t k;         /* The key. */
-    uint32_t v;         /* The value. */
+    uint64_t k;         /* The key. */
+    uint64_t v;         /* The value. */
     UT_hash_handle hh;  /* The hash handle. */
 } hash_entry_t;
 
@@ -20,9 +20,9 @@ hash_init(void)
 
 int
 hash_insert(hash_t *hash,
-            const uint32_t key,
-            const uint32_t in,
-            uint32_t *out)
+            const uint64_t key,
+            const uint64_t in,
+            uint64_t *out)
 {
     hash_entry_t *e = malloc(sizeof(hash_entry_t));
     if (e == NULL) {

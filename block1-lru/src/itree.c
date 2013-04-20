@@ -15,10 +15,10 @@
 /* itree structs. */
 
 struct __itree_iter_t {
-    const itree_t *root;        /**< The root of the iterated tree. */
-    const itree_t *stack[32];   /**< The node stack. Tree depth cannot exceed 32
-                                     since keys are uint32_t. */
-    int top;                    /**< The current top stack index. */
+    const itree_t *root;                    /**< The root of the iterated tree. */
+    const itree_t *stack[ITREE_MAX_DEPTH];  /**< The node stack. Tree depth cannot be exceeded
+                                                 since keys are uint64_t. */
+    int top;                                /**< The current top stack index. */
 };
 
 typedef struct {
@@ -32,15 +32,15 @@ static void
 _itree_print(const itree_t *root,
              uint8_t level);
 static int
-_itree_insert(const uint32_t index,
+_itree_insert(const uint64_t index,
               itree_t **root,
-              uint32_t *holes,
+              uint64_t *holes,
               itree_util_t *util);
 static int
-_itree_new_node(const uint32_t index,
+_itree_new_node(const uint64_t index,
                       itree_t **root);
 static void
-_itree_extend_node(const uint32_t index,
+_itree_extend_node(const uint64_t index,
                    itree_t *node);
 static void
 _itree_merge_nodes(itree_t *upper,
@@ -51,25 +51,25 @@ static inline int8_t
 _itree_height(const itree_t *node);
 static inline void
 _itree_set_height(itree_t *node);
-static inline uint32_t
+static inline uint64_t
 _itree_count(const itree_t *root);
 static int
-_itree_descend_l(const uint32_t index,
+_itree_descend_l(const uint64_t index,
                  itree_t **root,
-                 uint32_t *holes,
+                 uint64_t *holes,
                  itree_util_t *util);
 static int
-_itree_descend_r(const uint32_t index,
+_itree_descend_r(const uint64_t index,
                  itree_t **root,
-                 uint32_t *holes,
+                 uint64_t *holes,
                  itree_util_t *util);
 
 /* itree definitions. */
 
 int
-itree_insert(const uint32_t index,
+itree_insert(const uint64_t index,
                       itree_t **root,
-                      uint32_t *holes)
+                      uint64_t *holes)
 {
     itree_util_t util;
     memset(&util, 0, sizeof(itree_util_t));
@@ -99,15 +99,18 @@ _itree_print(const itree_t *root,
         return;
     }
 
-    printf("%*s{ k: [%d, %d], v: %d, h: %d }\n", level * INDENT, "", root->k1,
-           root->k2, root->v, root->h);
+    printf("%*s{ k: [%llu, %llu], v: %llu, h: %d }\n", level * INDENT, "",
+           (long long unsigned)root->k1,
+           (long long unsigned)root->k2,
+           (long long unsigned)root->v,
+           root->h);
 
     _itree_print(root->l, level + 1);
     _itree_print(root->r, level + 1);
 }
 
 static int
-_itree_new_node(const uint32_t index,
+_itree_new_node(const uint64_t index,
                       itree_t **root)
 {
     itree_t *droot = calloc(1, sizeof(itree_t));
@@ -132,7 +135,7 @@ _itree_new_node(const uint32_t index,
  *  * The node interval has been extended by index.
  */
 static void
-_itree_extend_node(const uint32_t index,
+_itree_extend_node(const uint64_t index,
                    itree_t *node)
 {
     assert(index == node->k1 - 1 || node->k2 + 1 == index);
@@ -183,7 +186,7 @@ _itree_set_height(itree_t *node)
 /**
  * Returns the count of elements in the tree.
  */
-static inline uint32_t
+static inline uint64_t
 _itree_count(const itree_t *root)
 {
     if (root == NULL) {
@@ -277,9 +280,9 @@ _itree_rebalance(itree_t **root)
 }
 
 static int
-_itree_descend_l(const uint32_t index,
+_itree_descend_l(const uint64_t index,
                  itree_t **root,
-                 uint32_t *holes,
+                 uint64_t *holes,
                  itree_util_t *util)
 {
     itree_t *droot = *root;
@@ -305,9 +308,9 @@ _itree_descend_l(const uint32_t index,
 }
 
 static int
-_itree_descend_r(const uint32_t index,
+_itree_descend_r(const uint64_t index,
                  itree_t **root,
-                 uint32_t *holes,
+                 uint64_t *holes,
                  itree_util_t *util)
 {
     itree_t *droot = *root;
@@ -346,9 +349,9 @@ _itree_descend_r(const uint32_t index,
  * Util keeps track of several internal variables needed for merging nodes.
  */
 static int
-_itree_insert(const uint32_t index,
+_itree_insert(const uint64_t index,
                       itree_t **root,
-                      uint32_t *holes,
+                      uint64_t *holes,
                       itree_util_t *util)
 {
     itree_t *droot = *root;
@@ -381,7 +384,8 @@ _itree_insert(const uint32_t index,
             return ret;
         }
     } else {
-        fprintf(stderr, "Index %d is already in tree\n", index);
+        fprintf(stderr, "Index %llu is already in tree\n",
+                (long long unsigned)index);
         return -1;
     }
 

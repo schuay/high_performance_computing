@@ -19,7 +19,7 @@ do { \
 START_TEST(test_insert_single_extension_holes##insert) \
 { \
     itree_t *root = dense_tree_with_interval(3); \
-    uint32_t holes; \
+    uint64_t holes; \
     fail_unless(itree_insert(insert, &root, &holes) == 0); \
     fail_unless(holes == expected_holes); \
     itree_free(root); \
@@ -30,7 +30,7 @@ END_TEST
 START_TEST(test_insert_double_extension_holes##insert) \
 { \
     itree_t *root = dense_tree_with_interval(2); \
-    uint32_t holes; \
+    uint64_t holes; \
     fail_unless(itree_insert(insert, &root, &holes) == 0); \
     fail_unless(holes == expected_holes); \
     itree_free(root); \
@@ -47,7 +47,7 @@ static itree_t *
 dense_tree_with_interval(int interval)
 {
     itree_t *root = NULL;
-    uint32_t holes;
+    uint64_t holes;
     fail_unless(itree_insert(8 * interval, &root, &holes) == 0);
     fail_unless(itree_insert(4 * interval, &root, &holes) == 0);
     fail_unless(itree_insert(12 * interval, &root, &holes) == 0);
@@ -94,7 +94,7 @@ END_TEST
 START_TEST(test_insert_into_empty)
 {
     itree_t *root = NULL;
-    uint32_t holes;
+    uint64_t holes;
     fail_unless(itree_insert(10, &root, &holes) == 0);
     fail_unless(holes == 0);
     CHK_NODE(root, == 10, == 10, == 0, == NULL, == NULL, == 0);
@@ -105,7 +105,7 @@ END_TEST
 START_TEST(test_insert_adjacent1l)
 {
     itree_t *root = NULL;
-    uint32_t holes;
+    uint64_t holes;
     fail_unless(itree_insert(10, &root, &holes) == 0);
     fail_unless(itree_insert(9, &root, &holes) == 0);
     fail_unless(holes == 1);
@@ -117,7 +117,7 @@ END_TEST
 START_TEST(test_insert_adjacent1r)
 {
     itree_t *root = NULL;
-    uint32_t holes;
+    uint64_t holes;
     fail_unless(itree_insert(10, &root, &holes) == 0);
     fail_unless(itree_insert(11, &root, &holes) == 0);
     fail_unless(holes == 0);
@@ -129,7 +129,7 @@ END_TEST
 START_TEST(test_insert_not_adjacentl)
 {
     itree_t *root = NULL;
-    uint32_t holes;
+    uint64_t holes;
     fail_unless(itree_insert(10, &root, &holes) == 0);
     fail_unless(itree_insert(8, &root, &holes) == 0);
     fail_unless(holes == 1);
@@ -143,7 +143,7 @@ END_TEST
 START_TEST(test_insert_not_adjacentr)
 {
     itree_t *root = NULL;
-    uint32_t holes;
+    uint64_t holes;
     fail_unless(itree_insert(10, &root, &holes) == 0);
     fail_unless(itree_insert(12, &root, &holes) == 0);
     fail_unless(holes == 0);
@@ -157,7 +157,7 @@ END_TEST
 START_TEST(test_insert_balance1)
 {
     itree_t *root = NULL;
-    uint32_t holes;
+    uint64_t holes;
     fail_unless(itree_insert(10, &root, &holes) == 0);
     fail_unless(itree_insert(15, &root, &holes) == 0);
     fail_unless(itree_insert(13, &root, &holes) == 0);
@@ -174,7 +174,7 @@ END_TEST
 START_TEST(test_insert_balance2)
 {
     itree_t *root = NULL;
-    uint32_t holes;
+    uint64_t holes;
     fail_unless(itree_insert(15, &root, &holes) == 0);
     fail_unless(itree_insert(10, &root, &holes) == 0);
     fail_unless(itree_insert(13, &root, &holes) == 0);
@@ -191,7 +191,7 @@ END_TEST
 START_TEST(test_insert_adjacent2)
 {
     itree_t *root = NULL;
-    uint32_t holes;
+    uint64_t holes;
     fail_unless(itree_insert(10, &root, &holes) == 0);
     fail_unless(itree_insert(12, &root, &holes) == 0);
     fail_unless(itree_insert(11, &root, &holes) == 0);
@@ -204,7 +204,7 @@ END_TEST
 START_TEST(test_insert_adjacent2_balance1)
 {
     itree_t *root = NULL;
-    uint32_t holes;
+    uint64_t holes;
     fail_unless(itree_insert(15, &root, &holes) == 0);
     fail_unless(itree_insert(9, &root, &holes) == 0);
     fail_unless(itree_insert(13, &root, &holes) == 0);
@@ -224,7 +224,7 @@ END_TEST
 START_TEST(test_insert_adjacent2_balance2)
 {
     itree_t *root = NULL;
-    uint32_t holes;
+    uint64_t holes;
     fail_unless(itree_insert(15, &root, &holes) == 0);
     fail_unless(itree_insert(9, &root, &holes) == 0);
     fail_unless(itree_insert(13, &root, &holes) == 0);

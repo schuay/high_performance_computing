@@ -24,9 +24,9 @@ hash_init(void);
  */
 int
 hash_insert(hash_t *hash,
-            const uint32_t key,
-            const uint32_t in,
-            uint32_t *out);
+            const uint64_t key,
+            const uint64_t in,
+            uint64_t *out);
 
 void
 hash_free(hash_t *hash);

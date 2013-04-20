@@ -3,9 +3,11 @@
 
 #include <stdint.h>
 
+#define ITREE_MAX_DEPTH (8 * sizeof(uint64_t))
+
 /**
- * An AVL tree with closed, mutually disjunct uint32_t intervals as keys and
- * uint32_t values representing the index count in the right subtree (the
+ * An AVL tree with closed, mutually disjunct uint64_t intervals as keys and
+ * uint64_t values representing the index count in the right subtree (the
  * interval [5, 7] counts as 3 indices).
  *
  * For further information, see the Tree of Holes in Almasi, Cascaval and
@@ -15,8 +17,8 @@
 
 typedef struct __itree_t {
     struct __itree_t *l, *r;    /**< The left and right child nodes. */
-    uint32_t k1, k2;            /**< The key interval [k1, k2]. */
-    uint32_t v;                 /**< The # of elements in the right subtree. */
+    uint64_t k1, k2;            /**< The key interval [k1, k2]. */
+    uint64_t v;                 /**< The # of elements in the right subtree. */
     uint8_t h;                  /**< The height of this node. height(node without
                                  *   children) == 0. */
 } itree_t;
@@ -34,9 +36,9 @@ typedef struct __itree_t {
  *  * Index is in the tree.
  */
 int
-itree_insert(const uint32_t index,
+itree_insert(const uint64_t index,
              itree_t **root,
-             uint32_t *holes);
+             uint64_t *holes);
 
 void
 itree_print(const itree_t *root);
@@ -52,7 +54,7 @@ typedef struct __itree_iter_t itree_iter_t;
  * inorder. Returns NULL on error.
  *
  * Precondition:
- *  * The tree must have a depth <= 32.
+ *  * The tree must have a depth <= ITREE_MAX_DEPTH.
  *  * root != NULL.
  *
  * Postconditions:
