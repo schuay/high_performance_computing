@@ -21,6 +21,10 @@ struct __itree_iter_t {
     int top;                    /**< The current top stack index. */
 };
 
+typedef struct {
+    itree_t *u, *l;             /**< Upper and lower adjacent nodes. */
+} itree_util_t;
+
 
 /* itree declarations. */
 
@@ -28,7 +32,7 @@ static int
 _itree_insert(const uint32_t index,
               itree_t **root,
               uint32_t *holes,
-              itree_t *adjacent);
+              itree_util_t *util);
 static int
 _itree_new_node(const uint32_t index,
                       itree_t **root);
@@ -43,7 +47,9 @@ itree_insert(const uint32_t index,
                       itree_t **root,
                       uint32_t *holes)
 {
-    return _itree_insert(index, root, holes, NULL);
+    itree_util_t util;
+    memset(&util, 0, sizeof(itree_util_t));
+    return _itree_insert(index, root, holes, &util);
 }
 
 static int
@@ -86,23 +92,21 @@ _itree_extend_node(const uint32_t index,
 
 /**
  * The workhorse for itree_insert.
- * Adjacent points to the most recent node passed with an interval immediately
- * adjacent to index (such as [1, 3] for index 4) and is used for combining
- * intervals.
+ * Util keeps track of several internal variables needed for merging nodes.
  */
 static int
 _itree_insert(const uint32_t index,
                       itree_t **root,
                       uint32_t *holes,
-                      itree_t *adjacent)
+                      itree_util_t *util)
 {
     int ret = 0;
     itree_t *droot = *root;
 
     /* Add to existing adjacent node. */
-    if (droot == NULL && adjacent != NULL) {
+    if (droot == NULL && util->u != NULL) {
         *holes = 0;
-        _itree_extend_node(index, adjacent);
+        _itree_extend_node(index, util->u);
         return 0;
     }
 
@@ -114,11 +118,17 @@ _itree_insert(const uint32_t index,
 
     /* Descend into left or right subtree. */
     if (droot->k1 > index) {
-        itree_t *adj = (droot->k1 == index + 1) ? droot : adjacent;
-        ret = _itree_insert(index, &droot->l, holes, adj);
+        if (droot->k1 == index + 1) {
+            if (util->u == NULL) {
+                util->u = droot;
+            } else {
+                /* TODO: Double merge. */
+            }
+        }
+        ret = _itree_insert(index, &droot->l, holes, util);
         if (ret != 0) { return ret; }
 
-        if (adj != NULL && adj == droot) {
+        if (util->u != NULL && util->u == droot) {
             /* This node has been extended. */
             *holes = droot->v + droot->k2 - index;
         } else {
@@ -129,13 +139,19 @@ _itree_insert(const uint32_t index,
 
         droot->h = MAX_H(droot->l, droot->r) + 1;
     } else if (index > droot->k2) {
-        itree_t *adj = (droot->k2 == index - 1) ? droot : adjacent;
-        ret = _itree_insert(index, &droot->r, holes, adj);
+        if (droot->k2 == index - 1) {
+            if (util->u == NULL) {
+                util->u = droot;
+            } else {
+                /* TODO: Double merge. */
+            }
+        }
+        ret = _itree_insert(index, &droot->r, holes, util);
         if (ret != 0) { return ret; }
 
-        if (adj != NULL && adj != droot) {
+        if (util->u != NULL && util->u != droot) {
             /* One of our ancestor nodes has been extended. */
-        } else if (adj != NULL && adj == droot) {
+        } else if (util->u != NULL && util->u == droot) {
             /* This node has been extended. */
             *holes = droot->v + droot->k2 - index;
         } else {
