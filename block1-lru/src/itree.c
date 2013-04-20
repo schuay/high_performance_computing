@@ -195,6 +195,11 @@ _itree_descend_r(const uint32_t index,
         droot->r = util->l->l;
     }
 
+    /* Adjust the subtree sum after a merge. */
+    if (util->l != NULL && util->l != droot) {
+        droot->v -= util->l->v + util->l->k2 - util->l->k1 + 1;
+    }
+
     droot->h = MAX_H(droot->l, droot->r) + 1;
 
     return 0;
