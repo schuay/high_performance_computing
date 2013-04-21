@@ -7,7 +7,7 @@
 #define SI (STACKDIST_INFINITE)
 
 static uint64_t trace[] = { 0, 1, 2, 3, 4, 5, 6, 3, 7, 8, 3, 0, 5,10, 4, 3, 4, 4, 4 };
-static uint64_t expct[] = {SI,SI,SI,SI,SI,SI,SI, 3,SI,SI, 2, 8, 4,SI, 6, 3, 1, 0, 0 };
+static uint64_t expct[] = {SI,SI,SI,SI,SI,SI,SI, 3,SI,SI, 2, 8, 5,SI, 7, 4, 1, 0, 0 };
 static uint64_t actual[sizeof(expct) / sizeof(expct[0])];
 
 static void
@@ -21,7 +21,7 @@ START_TEST(test_1)
 {
     const int n = sizeof(trace) / sizeof(trace[0]);
     fail_unless(stackdist_process_trace(trace, n, stackdist_callback) == 0);
-    fail_unless(memcmp(expct, actual, n) == 0);
+    fail_unless(memcmp(expct, actual, sizeof(trace)) == 0);
 }
 END_TEST
 
