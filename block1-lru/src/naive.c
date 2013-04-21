@@ -17,7 +17,22 @@ static int
 llist_push(llist_head_t *l,
            const uint64_t v)
 {
-    return -1;
+    llist_t *head = malloc(sizeof(llist_t));
+    if (head == NULL) {
+        return -1;
+    }
+
+    head->prev = NULL;
+    head->next = l->head;
+    head->v = v;
+
+    if (l->head != NULL) {
+        l->head->prev = head;
+    }
+
+    l->head = head;
+
+    return 0;
 }
 
 static llist_t *
@@ -25,12 +40,42 @@ llist_remove(llist_head_t *l,
              const uint64_t v,
              uint64_t *depth)
 {
-    return NULL;
+    uint64_t d = 0;
+    llist_t *i = l->head;
+    while (i != NULL) {
+        if (i->v == v) {
+            break;
+        }
+        i = i->next;
+        d++;
+    }
+
+    if (i != NULL) {
+        if (i->prev != NULL) {
+            i->prev->next = i->next;
+        } else {
+            l->head = i->next;
+        }
+
+        if (i->next != NULL) {
+            i->next->prev = i->prev;
+        }
+
+        *depth = d;
+    }
+
+    return i;
 }
 
 static void
 llist_free(llist_head_t *l)
 {
+    llist_t *i = l->head;
+    while (i != NULL) {
+        llist_t *j = i->next;
+        free(i);
+        i = j;
+    }
 }
 
 int
