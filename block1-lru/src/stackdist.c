@@ -39,7 +39,7 @@ stackdist_process_trace(const uint64_t *p,
             goto out;
         }
 
-        const uint64_t dist = i - last - holes;
+        const uint64_t dist = i - last - holes - 1;
         fn(i, dist);
     }
 out:
