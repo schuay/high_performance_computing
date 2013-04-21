@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "stackdist.h"
@@ -33,6 +34,14 @@ print_distance_sums(const uint64_t *sums,
     for (int i = 0; i < n; i++) {
         printf("%llu\n", (long long unsigned)sums[i]);
     }
+}
+
+static double
+get_time(void)
+{
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    return t.tv_sec + t.tv_nsec*1e-9;
 }
 
 static void
@@ -82,10 +91,18 @@ main(int argc, char **argv)
 
     memset(distance_sums, 0, sizeof(distance_sums));
 
+    const double start = get_time();
+
     const int n = sb.st_size / sizeof(uint64_t);
     stackdist_process_trace(p, n, stackdist_callback);
 
+    const double end = get_time();
+
     print_distance_sums(distance_sums, sizeof(distance_sums) / sizeof(distance_sums[0]));
+
+    if (bench != 0) {
+        printf("%f secs\n", end - start);
+    }
 
     if (munmap(p, sb.st_size) == -1) {
         perror("munmap");
