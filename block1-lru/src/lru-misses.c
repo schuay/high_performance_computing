@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,18 +38,31 @@ print_distance_sums(const uint64_t *sums,
 static void
 usage(void)
 {
-    fprintf(stderr, "usage: lru-misses filename\n");
+    fprintf(stderr, "usage: lru-misses [-b] filename\n"
+                    "   -b: Output benchmarking information\n");
     exit(EXIT_FAILURE);
 }
 
 int
 main(int argc, char **argv)
 {
-    if (argc != 2) {
+    int bench = 0;
+    int opt;
+    while ((opt = getopt(argc, argv, "b")) != -1) {
+        switch (opt) {
+        case 'b':
+            bench = 1;
+            break;
+        default: /* '?' */
+            usage();
+        }
+    }
+
+    if (optind != argc - 1) {
         usage();
     }
     
-    int fd = open(argv[1], O_RDONLY);
+    int fd = open(argv[optind], O_RDONLY);
     if (fd == -1) {
         perror("open");
         return EXIT_FAILURE;
