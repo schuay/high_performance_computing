@@ -10,6 +10,7 @@ add_library(stackdist
 
 add_executable(lru-misses
     lru-misses.c
+    naive.c
 )
 
 target_link_libraries(lru-misses

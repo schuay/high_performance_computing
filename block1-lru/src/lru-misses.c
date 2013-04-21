@@ -8,6 +8,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "naive.h"
 #include "stackdist.h"
 
 #define SUMS_COUNT (65)
@@ -91,17 +92,23 @@ main(int argc, char **argv)
 
     memset(distance_sums, 0, sizeof(distance_sums));
 
-    const double start = get_time();
+    double start = get_time();
 
     const int n = sb.st_size / sizeof(uint64_t);
     stackdist_process_trace(p, n, stackdist_callback);
 
-    const double end = get_time();
-
-    print_distance_sums(distance_sums, sizeof(distance_sums) / sizeof(distance_sums[0]));
+    double end = get_time();
 
     if (bench != 0) {
-        printf("%f secs\n", end - start);
+        printf("itree: %f secs\n", end - start);
+
+        double start = get_time();
+        naive_process_trace(p, n, stackdist_callback);
+        double end = get_time();
+
+        printf("naive: %f secs\n", end - start);
+    } else {
+        print_distance_sums(distance_sums, sizeof(distance_sums) / sizeof(distance_sums[0]));
     }
 
     if (munmap(p, sb.st_size) == -1) {
