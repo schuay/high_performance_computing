@@ -8,7 +8,7 @@ find_package(Check)
 find_package(Doxygen)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    add_definitions("-Wall -Wextra -pedantic -std=c99 -D_POSIX_C_SOURCE=199506")
+    add_definitions("-Wall -Wextra -pedantic -std=c99 -O3 -D_POSIX_C_SOURCE=199506")
 endif()
 
 if(DOXYGEN_FOUND)
