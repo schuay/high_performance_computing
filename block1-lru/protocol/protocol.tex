@@ -1,0 +1,307 @@
+\documentclass[a4paper,10pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{comment}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage[pdfborder={0 0 0}]{hyperref}
+\usepackage{spverbatim}
+
+\definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
+\definecolor{Gray}{gray}{0.5}
+
+\lstset{
+    language=C,
+    basicstyle=\ttfamily,
+    keywordstyle=\color{OliveGreen},
+    commentstyle=\color{Gray},
+    captionpos=b,
+    breaklines=true,
+    breakatwhitespace=false,
+    showspaces=false,
+    showtabs=false,
+    numbers=left,
+}
+
+\title{VU High Performance Computing \\
+       SS 2013 \\
+       Block 1: Memory Hierarchy \\
+       lru-misses}
+\author{Jakob Gruber, 0203440}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\pagebreak
+
+\section{Introduction} \label{section:introduction}
+
+In this exercise, we implemented an algorithm to efficiently calculate stack distances
+for a memory trace. These were then used to output the number of cache misses incurred by the
+LRU eviction policy for stack sizes $2^i, i \in [0, 64]$.
+
+Caches play a critical part in the performance of a computer program.
+They are designed to exploit common characteristics of programs such as
+spacial and temporal locality to avoid cache misses (which require
+loading data from slower memory sections). This can be achieved by
+so-called eviction policies, which decide which cache items are
+to be discarded when the cache runs out of space.
+
+To optimally exploit temporal locality, the policy would need to evict
+the item which will not be needed for the longest time in the future. To do this, the algorithm would need know the future, which we have not been able to accomplish yet.
+
+A good and practical solution is the \emph{Least Recently Used} (LRU)
+policy, which simply evicts the item which has not been referenced for the largest amount of time. This exercise examines the behavior of the LRU algorithm for different stack sizes.
+
+A memory trace contains all memory references incurred by the execution
+of a program in their original order. We can simulate an LRU cache simply by iterating through the references and maintaining a stack as follows: 
+
+\begin{itemize}
+\item If the current address $a$ is not in the stack, it is placed on top.      and its stack distance $d$ is defined as $\infty$.
+\item If it is in the stack, $d$ is defined as the position of $a$ within the stack.
+      $a$ is then removed and subsequently placed on top.
+\end{itemize}
+
+A stack distance $d$ which is equal or greater to the stack size results
+in a cache miss, while all others result in a cache hit.
+
+This naive version of this algorithm is rather inefficient, and \emph{Almasi, Cascaval and Padua. Calculating stack distances efficiently. SIG-PLAN Not. 38, 2 supplement (June 2002), 37-43.} describes several optimizations.
+
+These rely on using alternative data structures to simulate the LRU algorithm: a hash table $\mathbf{P}_\tau$ stores the index $i$ within the memory trace for each memory address; and $\mathbf{B}_\tau$ maintains a list of
+of all indices $i < \tau$ with an associated $1$ if that index is on the stack at time $\tau$ or $0$ otherwise. Together, these structures can
+be used to  determine $dist(\tau)$.
+
+Most of the time during simulation is spent on traversing and maintaing $\mathbf{B}$, and the \emph{Interval Tree of Holes} focuses on making these tasks as efficient as possible. This algorithm is based on the fact that
+$1$'s in $\mathbf{B}$ are created and destroyed all the time, while $0$'s
+do not change once they are created.
+
+The tree we use is based on the well known AVL trees and is structured
+as follows:
+
+\begin{itemize}
+\item The key of each node is a closed interval $[k_1, k_2]$ with
+      $k_1 \leq k_2$.
+\item $\forall k'_1, k'_2$ in the left subtree of the node with $k_1$,          $k'_1 \leq k'_2 < k_1 - 1$.
+\item Likewise, $\forall k'_1, k'_2$ in the right subtree of the node with $k_2$, $k_2 + 1 < k'_1 \leq k'_2$.
+\item Each node stores the count of all elements
+      in the right subtree. For example, the count of elements in the
+      interval $[1, 3]$ is $3$.
+\end{itemize}
+
+This data structure allows us to insert a new hole and return the count
+of all succeeding holes in a single traversal with a worst case
+time of $O(\log n)$.
+
+Let $holes_\tau(x)$ be the number of holes after index $x$. The distance
+can then be calculated with
+
+\begin{displaymath}
+dist(\tau) = \tau - \mathbf{P}_\tau(x_\tau) - holes_\tau(\mathbf{P}_\tau(x_\tau))
+\end{displaymath}
+
+\section{Implementation}
+
+This section details implementation aspects of the LRU misses algorithm.
+Our programming language of choice is C99. CMake\footnote{\url{www.cmake.org}} was used as the build system, Check\footnote{\url{check.sourceforge.net}} as a unit testing framework, and Doxygen\footnote{\url{www.doxygen.org}} for online API documentation.
+
+The project can be built by running \verb|make| in the project root directory. After a successful compilation, the binaries can be found in \verb|build/src/|.
+
+Unit tests are provided for the major modules (hash, itree and stackdist) and are executed by running \verb|make check|.
+
+The API documentation is generated by running \verb|make doc| and will be
+placed in the \verb|doc/{html,latex}| directories.
+
+The protocol (which you are currently reading) can be built by running
+\verb|make| in the \verb|protocol| subdirectory.
+
+\subsection{gentrace}
+
+\begin{verbatim}
+gentrace [-s seed] [-p] -m domain -n count
+    -p: Prints values as strings instead of binary
+\end{verbatim}
+
+\verb|gentrace| is a utility which generates a random sequence of numbers
+if length $count$ within $[0, domain - 1]$ and prints it to \lstinline|stdout|. Optionally, a specific
+random seed for \lstinline|srand()| can be specified (otherwise $0$ is
+used as the seed). The default behavior is to output in binary, but
+human-readable numbers can be printed instead if \verb|-p| is passed.
+
+The implementation itself can be summarized as
+
+\begin{lstlisting}
+for (...) { print(rand() % domain) }
+\end{lstlisting}
+
+\subsection{lru-misses}
+
+\begin{verbatim}
+lru-misses filename
+\end{verbatim}
+
+\verb|lru-misses| is a simple wrapper around \verb|stackdist| which parses arguments
+and maps the given file into memory using \lstinline|mmap()|. It is also
+responsible for accumulating the stack distances by providing a suitable callback
+function which uses a bitmask to determine whether the current distance is greater or
+equal the stack size, and in that case increments the associated misses count.
+
+\subsection{stackdist}
+
+\verb|stackdist| implements $dist(\tau)$ as defined in section \ref{section:introduction}.
+It heavily relies on the implementation of \verb|hash| and \verb|itree|.
+
+For each element $a$ at index $i$ in the trace, the previous value of $\mathbf{P}_\tau(a)$ is retrieved
+while simultaneously inserting $i$ as the new value. If $\mathbf{P}_\tau(a) \neq \infty$,
+we also determine $holes_\tau(x)$ and insert a new hole at $\mathbf{P}_\tau(a)$. For each
+resulting $dist(\tau)$, the provided callback function is called with the current index
+and distance.
+
+\subsection{hash}
+
+The \verb|hash| module provides a hash implementation with a simplified interface:
+
+\begin{lstlisting}
+hash_t *
+hash_init(void);
+
+int
+hash_insert(hash_t *hash,
+            const uint64_t key,
+            const uint64_t in,
+            uint64_t *out);
+
+void
+hash_free(hash_t *hash);
+\end{lstlisting}
+
+\lstinline|hash_insert()| stores \lstinline|in| as the new value for \lstinline|key|,
+and writes the previous value of \lstinline|key| into \lstinline|out|. If no such previous
+value exists, \lstinline|out| is set to \lstinline|HASH_NOT_FOUND|.
+
+Since the implementation is based on \verb|uthash|\footnote{\url{http://troydhanson.github.io/uthash/}},
+which already has all functionality we require, this module boils down to a simple wrapper.
+
+\subsection{itree}
+
+Again, \verb|itree| provides a simple interface to a modified AVL interval tree implementation
+as described in section \ref{section:introduction}:
+
+\begin{lstlisting}
+int
+itree_insert(const uint64_t index,
+             itree_t **root,
+             uint64_t *holes);
+
+void
+itree_free(itree_t *root);
+\end{lstlisting}
+
+\lstinline|itree_insert()| inserts a new hole at \lstinline|index| and writes the
+count of holes after \lstinline|index| into \lstinline|holes|. Internally, insertion
+can involve merging tree nodes, rebalancing the subtree, and updating bookkeeping information
+such as node heights and partial sums.
+
+The tree is not preallocated; whenever a new node is required, it is created with \lstinline|malloc()|.
+If a node need to be removed during the course of an insertion (which can happen if two nodes are being
+merged), the associated memory is freed.
+
+In general, this structure is very efficient, requiring only a single descent from
+the root to the expected location of the leaf node for the current index. Only
+the right-right and left-right case of rebalancing need traversal of unrelated subtrees
+to calculate partial sums.
+
+\subsection{naive}
+
+Like \verb|stackdist|, \verb|naive| makes processes a program trace and produces
+a stack distance for each trace element. However, instead of using the efficient
+tree of holes algorithm, stack distances are calculated by maintaining a stack
+of referenced elements.
+
+For each element of the program trace, we first check if the stack contains it.
+If it does, the depth of the found element is our stack distance, and we remove
+the element from the stack. Otherwise, the stack distance is $\infty$. Finally,
+the element is pushed on top of the stack.
+
+\section{Results}
+
+The following results were produced by running the benchmark ten times each
+on various domains and trace sizes. All traces were produced by \verb|gentrace|, which means
+they are completely random and do not have realistic locality behavior. This is somewhat
+less than ideal, but no real program traces were available at the time of writing.
+Locality effects can be somewhat simulated by altering the size of the domain.
+
+Each run first processed the same trace using the tree of holes algorithm, and then
+with a naive stack-based algorithm.
+Any runs taking longer than one minute to complete
+were aborted. For further information, the complete bench script can be found in
+\verb|bench.sh|.
+
+Our test machine consists of the following hardware / software stack: an Intel(R) Core(TM) i5 CPU 760 @ 2.80GHz
+processor with 4GB of RAM and gcc 4.8.0. \verb|lru-misses| was compiled with \spverb|CFLAGS+="-Wall -Wextra -pedantic -std=c99 -O3 -D_POSIX_C_SOURCE=199506"|.
+
+% TODO: Results (tables, boxplots), and how we created them in R.
+
+\begin{comment}
+We chose the format a little unwisely. Convert it into CSV which we can use:
+
+$ echo m, n, algorithm, seconds > ~/tmp.csv
+$ awk '/^[0-9]/ { m = $1; n = $2; } /^[^0-9]/ { print m, n, $0 }' bench_results | cut -d' ' -f1-4 | sed 's/://' | sed 's/ /, /g' >> ~/tmp.csv
+
+in R:
+
+mydata = read.csv("~/tmp.csv")
+mins <- aggregate(seconds ~ m +  n + algorithm, data = mydata, FUN = min)
+
+plot(log2(mins$n), mins$seconds, type="n")
+
+for(alg in c("itree", "naive")) {
+  for(i in c(1024, 65536, 4194304)) {
+    ss <- subset(mydata, grepl(alg, algorithm) & m == i)
+    sm <- aggregate(seconds ~ m +  n + algorithm, data = ss, FUN = min)
+    jpeg(paste(alg, i, ".jpg", sep = "_"))
+    plot(log2(sm$n), log10(sm$seconds))
+    dev.off()
+  }
+}
+
+\end{comment}
+
+
+% TODO: Show valgrind callee maps.
+
+\section{Analysis}
+
+The first point to mention is the effect of compiler optimizations on this application.
+We observed a slowdown by a factor of $3$ when \verb|lru-misses| was compiled without the \verb|-O3| flag.
+After \verb|-O3|, none of the other optimization attempts we made (branch hints, unrolling loops, inlining
+string functions, omitting the frame pointer) had any effect (and a few actually hurt the
+performance).
+
+\verb|valgrind| shows us that a large portion
+% TODO: Exact percentage
+of the time spent in \verb|hash| was
+used for \lstinline|malloc()| and \lstinline|free()|; a good point for
+further optimization would be either preallocating the entire hash area, or writing
+our own allocator which could use strategies such as doubling the size of allocated
+memory when needed.
+
+Generally, the results turned out as expected. For small ($m = 1024$) domains, which can be compared
+to programs with good temporal locality characteristics, the naive algorithm performed
+very well even for large trace sizes. However, as soon as the domain size was increased,
+runtimes went throught the roof. For $n = 262144, m = 1024$, the naive algorithm took around $0.28$ seconds,
+but over one minute when the domain was increased to $m = 65536$. It should be noted that the
+naive algorithm was comparable to the interval tree implementation for a maximum stack depth of $1024$.
+
+The interval tree algorithm on the other hand performed well for every dataset we could throw
+at it. Runtimes were very similar for all domain sizes (locality behavior) for a given trace
+length.
+
+% TODO
+
+
+\end{document}
