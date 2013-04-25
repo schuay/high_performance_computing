@@ -101,6 +101,7 @@ main(int argc, char **argv)
 
     if (bench != 0) {
         printf("itree: %f secs\n", end - start);
+        fflush(stdout);
 
         double start = get_time();
         naive_process_trace(p, n, stackdist_callback);
