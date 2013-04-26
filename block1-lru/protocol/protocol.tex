@@ -8,6 +8,8 @@
 \usepackage{listings}
 \usepackage[pdfborder={0 0 0}]{hyperref}
 \usepackage{spverbatim}
+\usepackage{booktabs}
+\usepackage{graphicx}
 
 \definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
 \definecolor{Gray}{gray}{0.5}
@@ -271,6 +273,49 @@ for(alg in c("itree", "naive")) {
 
 \end{comment}
 
+\vspace{3mm}
+
+\begin{figure}
+\begin{tabular}{lllllll}
+\toprule
+  & \multicolumn{3}{c}{itree} & \multicolumn{3}{c}{naive} \\
+\cmidrule(r){2-4} \cmidrule(r){5-7}
+n & m: 1024 & 65536 & 4194304 & 1024 & 65536 & 4194304 \\
+\midrule
+$2^{10} - 1$ & 0.000782 & 0.000707 & 0.000707 & 0.001497 & 0.002536 & 0.002588 \\
+$2^{10}$ & 0.000785 & 0.000707 & 0.000707 & 0.001498 & 0.002539 & 0.002589 \\
+$2^{12} - 1$ & 0.001238 & 0.001012 & 0.001119 & 0.003365 & 0.017763 & 0.017663 \\
+$2^{12}$ & 0.001253 & 0.001026 & 0.001112 & 0.003356 & 0.017488 & 0.018120 \\
+$2^{14} - 1$ & 0.005304 & 0.004879 & 0.004771 & 0.014064 & 0.665381 & 0.315605 \\
+$2^{14}$ & 0.005411 & 0.004974 & 0.004776 & 0.013848 & 0.664488 & 0.313936 \\
+$2^{16} - 1$ & 0.022901 & 0.029147 & 0.021503 & 0.056131 & 8.419123 & 5.200901 \\
+$2^{16}$ & 0.025122 & 0.031381 & 0.025798 & 0.056110 & 8.405805 & 5.257672 \\
+$2^{18} - 1$ & 0.095306 & 0.166923 & 0.126534 & 0.281367 & - & - \\
+$2^{18}$ & 0.099071 & 0.165584 & 0.126879 & 0.281070 & - & - \\
+$2^{20} - 1$ & 0.413038 & 0.762247 & 0.720135 & 0.910143 & - & - \\
+$2^{20}$ & 0.408702 & 0.758613 & 0.718786 & 0.911560 & - & - \\
+$2^{22} - 1$ & 1.782836 & 1.782836 & 4.420222 & 4.642334 & - & - \\
+$2^{22}$ & 1.781537 & 3.306993 & 4.418395 & 4.642471 & - & - \\
+$2^{24} - 1$ & 7.712480 & 13.663880 & 28.143149 & 14.776201 & - & - \\
+$2^{24}$ & 7.722113 & 13.895539 & 28.146539 & 14.759987 & - & - \\
+$2^{26} - 1$ & 34.855011 & 57.933851 & - & - & - & - \\
+$2^{26}$ & 34.871410 & 57.952512 & - & - & - & - \\
+\bottomrule
+\end{tabular}
+\caption{Runtimes in seconds (minimum of 10 runs). Runs longer than 1 minute were aborted.}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{itree}
+\caption{Runtimes in seconds (minimum of 10 runs) of the interval tree algorithm.
+Data sets are labelled with the domain size.}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{naive}
+\caption{Runtimes in seconds (minimum of 10 runs) of the naive algorithm.
+Data sets are labelled with the domain size.}
+\end{figure}
 
 % TODO: Show valgrind callee maps.
 
