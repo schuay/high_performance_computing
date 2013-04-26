@@ -49,7 +49,7 @@ LRU eviction policy for stack sizes $2^i, i \in [0, 64]$.
 
 Caches play a critical part in the performance of a computer program.
 They are designed to exploit common characteristics of programs such as
-spacial and temporal locality to avoid cache misses (which require
+spatial and temporal locality to avoid cache misses (which require
 loading data from slower memory sections). This can be achieved by
 so-called eviction policies, which decide which cache items are
 to be discarded when the cache runs out of space.
@@ -69,7 +69,7 @@ of a program in their original order. We can simulate an LRU cache simply by ite
       $a$ is then removed and subsequently placed on top.
 \end{itemize}
 
-A stack distance $d$ which is equal or greater to the stack size results
+A stack distance $d$ which is equal or greater to the cache size results
 in a cache miss, while all others result in a cache hit.
 
 This naive version of this algorithm is rather inefficient, and \emph{Almasi, Cascaval and Padua. Calculating stack distances efficiently. SIG-PLAN Not. 38, 2 supplement (June 2002), 37-43.} describes several optimizations.
@@ -109,7 +109,7 @@ dist(\tau) = \tau - \mathbf{P}_\tau(x_\tau) - holes_\tau(\mathbf{P}_\tau(x_\tau)
 \section{Implementation}
 
 This section details implementation aspects of the LRU misses algorithm.
-Our programming language of choice is C99. CMake\footnote{\url{www.cmake.org}} was used as the build system, Check\footnote{\url{check.sourceforge.net}} as a unit testing framework, and Doxygen\footnote{\url{www.doxygen.org}} for online API documentation.
+Our programming language of choice is C99. CMake\footnote{\url{www.cmake.org}} was used as the build system, Check\footnote{\url{check.sourceforge.net}} as a unit testing framework, and Doxygen\footnote{\url{www.doxygen.org}} for inline API documentation.
 
 The project can be built by running \verb|make| in the project root directory. After a successful compilation, the binaries can be found in \verb|build/src/|.
 
@@ -219,7 +219,7 @@ to calculate partial sums.
 
 \subsection{naive}
 
-Like \verb|stackdist|, \verb|naive| makes processes a program trace and produces
+Like \verb|stackdist|, \verb|naive| processes a program trace and produces
 a stack distance for each trace element. However, instead of using the efficient
 tree of holes algorithm, stack distances are calculated by maintaining a stack
 of referenced elements.
@@ -246,7 +246,21 @@ were aborted. For further information, the complete bench script can be found in
 Our test machine consists of the following hardware / software stack: an Intel(R) Core(TM) i5 CPU 760 @ 2.80GHz
 processor with 4GB of RAM and gcc 4.8.0. \verb|lru-misses| was compiled with \spverb|CFLAGS+="-Wall -Wextra -pedantic -std=c99 -O3 -D_POSIX_C_SOURCE=199506"|.
 
-% TODO: Results (tables, boxplots), and how we created them in R.
+Figure \ref{fig:resultstable} shows all results in a table format. The displayed
+times were the minimum over a total of ten runs each. All runs longer than
+one minute were aborted.
+
+Figures \ref{fig:resultsplotitree} and \ref{fig:resultsplotnaive} display
+the behavior of, respectively, the itree and naive algorithms. Note that both axes
+are logarithmic.
+
+Finally, figure \ref{fig:calleemap} shows the callee map of \lstinline|main()|
+as traced by
+
+\begin{verbatim}
+$ valgrind --tool=cachegrind --tool=callgrind --dump-instr=yes 
+--collect-jumps=yes build/src/lru-misses trace.bin 
+\end{verbatim}
 
 \begin{comment}
 We chose the format a little unwisely. Convert it into CSV which we can use:
@@ -303,21 +317,28 @@ $2^{26}$ & 34.871410 & 57.952512 & - & - & - & - \\
 \bottomrule
 \end{tabular}
 \caption{Runtimes in seconds (minimum of 10 runs). Runs longer than 1 minute were aborted.}
+\label{fig:resultstable}
 \end{figure}
 
 \begin{figure}
 \includegraphics[width=\textwidth]{itree}
 \caption{Runtimes in seconds (minimum of 10 runs) of the interval tree algorithm.
 Data sets are labelled with the domain size.}
+\label{fig:resultsplotitree}
 \end{figure}
 
 \begin{figure}
 \includegraphics[width=\textwidth]{naive}
 \caption{Runtimes in seconds (minimum of 10 runs) of the naive algorithm.
 Data sets are labelled with the domain size.}
+\label{fig:resultsplotnaive}
 \end{figure}
 
-% TODO: Show valgrind callee maps.
+\begin{figure}
+\includegraphics[width=\textwidth]{calleemap}
+\caption{The callee map of an lru-misses run with the interval tree algorithm}
+\label{fig:calleemap}
+\end{figure}
 
 \section{Analysis}
 
@@ -327,9 +348,7 @@ After \verb|-O3|, none of the other optimization attempts we made (branch hints,
 string functions, omitting the frame pointer) had any effect (and a few actually hurt the
 performance).
 
-\verb|valgrind| shows us that a large portion
-% TODO: Exact percentage
-of the time spent in \verb|hash| was
+\verb|valgrind| shows us that a large portion (over 35 \%) of the time spent in \verb|hash| was
 used for \lstinline|malloc()| and \lstinline|free()|; a good point for
 further optimization would be either preallocating the entire hash area, or writing
 our own allocator which could use strategies such as doubling the size of allocated
@@ -342,11 +361,19 @@ runtimes went throught the roof. For $n = 262144, m = 1024$, the naive algorithm
 but over one minute when the domain was increased to $m = 65536$. It should be noted that the
 naive algorithm was comparable to the interval tree implementation for a maximum stack depth of $1024$.
 
+An interesting point was traces with a domain of $2^{22}$ actually caused the naive algorithm
+to perform better than traces with a domain of $2^{16}$. We were not able to pinpoint the
+cause of this behavior. A guess could be that less time was spent allocating and deallocating
+heap memory since the trace elements were rarely found in the existing stack (and thus did
+not have to be freed).
+
 The interval tree algorithm on the other hand performed well for every dataset we could throw
-at it. Runtimes were very similar for all domain sizes (locality behavior) for a given trace
-length.
+at it. Runtimes were well-behaved for all domain sizes (locality behavior). Larger traces 
+exhibited noticeable differences  with different domain sizes, but all of them stayed within
+acceptable bounds. The only time we actually reached our self-imposed runtime limit of one minute
+was with the largest data set and a domain size of $2^{22}$.
 
-% TODO
-
+As in the original paper, interval tree maintenance took around $65\%$ of the runtime; hash replacements
+used $~25\%$, while the remaining $10\%$ were required to track the sums of misses.
 
 \end{document}
