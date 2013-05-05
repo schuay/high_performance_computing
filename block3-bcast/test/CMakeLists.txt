@@ -5,7 +5,7 @@ include_directories(
 
 add_executable(bcast_test bcast.c)
 target_link_libraries(bcast_test
-    native
+    bcast
     util
     ${CHECK_LIBRARIES}
     ${MPI_C_LIBRARIES}
