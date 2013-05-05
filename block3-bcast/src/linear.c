@@ -1,8 +1,8 @@
 #include "linear.h"
 
-#define BLOCK_SIZE (1024)
+#include "util.h"
 
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define BLOCK_SIZE (1024)
 
 int
 bcast_linear(int *buffer,
