@@ -41,6 +41,7 @@ BCAST_TEST(native05, bcast_native, MPI_COMM_WORLD, 0, 1024, 0)
 BCAST_TEST(native06, bcast_native, MPI_COMM_WORLD, 0, 1024, 1)
 BCAST_TEST(native07, bcast_native, MPI_COMM_WORLD, 0, 1024, 2)
 BCAST_TEST(native08, bcast_native, MPI_COMM_WORLD, 0, 1024, 3)
+BCAST_TEST(native09, bcast_native, MPI_COMM_WORLD, 0, 1501, 0)
 
 BCAST_TEST(linear01, bcast_linear, MPI_COMM_WORLD, 0, 1, 0)
 BCAST_TEST(linear02, bcast_linear, MPI_COMM_WORLD, 0, 42, 0)
@@ -50,6 +51,7 @@ BCAST_TEST(linear05, bcast_linear, MPI_COMM_WORLD, 0, 1024, 0)
 BCAST_TEST(linear06, bcast_linear, MPI_COMM_WORLD, 0, 1024, 1)
 BCAST_TEST(linear07, bcast_linear, MPI_COMM_WORLD, 0, 1024, 2)
 BCAST_TEST(linear08, bcast_linear, MPI_COMM_WORLD, 0, 1024, 3)
+BCAST_TEST(linear09, bcast_linear, MPI_COMM_WORLD, 0, 1501, 0)
 
 BCAST_TEST(binary01, bcast_binary, MPI_COMM_WORLD, 0, 1, 0)
 BCAST_TEST(binary02, bcast_binary, MPI_COMM_WORLD, 0, 42, 0)
@@ -59,6 +61,7 @@ BCAST_TEST(binary05, bcast_binary, MPI_COMM_WORLD, 0, 1024, 0)
 BCAST_TEST(binary06, bcast_binary, MPI_COMM_WORLD, 0, 1024, 1)
 BCAST_TEST(binary07, bcast_binary, MPI_COMM_WORLD, 0, 1024, 2)
 BCAST_TEST(binary08, bcast_binary, MPI_COMM_WORLD, 0, 1024, 3)
+BCAST_TEST(binary09, bcast_binary, MPI_COMM_WORLD, 0, 1501, 0)
 
 BCAST_TEST(binomial01, bcast_binomial, MPI_COMM_WORLD, 0, 1, 0)
 BCAST_TEST(binomial02, bcast_binomial, MPI_COMM_WORLD, 0, 42, 0)
@@ -68,6 +71,7 @@ BCAST_TEST(binomial05, bcast_binomial, MPI_COMM_WORLD, 0, 1024, 0)
 BCAST_TEST(binomial06, bcast_binomial, MPI_COMM_WORLD, 0, 1024, 1)
 BCAST_TEST(binomial07, bcast_binomial, MPI_COMM_WORLD, 0, 1024, 2)
 BCAST_TEST(binomial08, bcast_binomial, MPI_COMM_WORLD, 0, 1024, 3)
+BCAST_TEST(binomial09, bcast_binomial, MPI_COMM_WORLD, 0, 1501, 0)
 
 static Suite *
 create_suite(void)
@@ -83,6 +87,7 @@ create_suite(void)
     tcase_add_test(tc_core, native06);
     tcase_add_test(tc_core, native07);
     tcase_add_test(tc_core, native08);
+    tcase_add_test(tc_core, native09);
 
     tcase_add_test(tc_core, linear01);
     tcase_add_test(tc_core, linear02);
@@ -92,6 +97,7 @@ create_suite(void)
     tcase_add_test(tc_core, linear06);
     tcase_add_test(tc_core, linear07);
     tcase_add_test(tc_core, linear08);
+    tcase_add_test(tc_core, linear09);
 
     tcase_add_test(tc_core, binary01);
     tcase_add_test(tc_core, binary02);
@@ -101,6 +107,7 @@ create_suite(void)
     tcase_add_test(tc_core, binary06);
     tcase_add_test(tc_core, binary07);
     tcase_add_test(tc_core, binary08);
+    tcase_add_test(tc_core, binary09);
 
     tcase_add_test(tc_core, binomial01);
     tcase_add_test(tc_core, binomial02);
@@ -110,6 +117,7 @@ create_suite(void)
     tcase_add_test(tc_core, binomial06);
     tcase_add_test(tc_core, binomial07);
     tcase_add_test(tc_core, binomial08);
+    tcase_add_test(tc_core, binomial09);
 
     suite_add_tcase(s, tc_core);
 
