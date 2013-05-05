@@ -27,7 +27,7 @@ enum {
     ALG_LINEAR   = 1 << 3,
 };
 
-typedef int (*bcast_t)(void *, int, int, MPI_Comm);
+typedef int (*bcast_t)(int *, int, int, MPI_Comm);
 
 static void
 usage(void)

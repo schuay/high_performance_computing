@@ -4,7 +4,7 @@
 #include <mpi.h>
 
 int
-bcast_binomial(void *buffer,
+bcast_binomial(int *buffer,
                int count,
                int root,
                MPI_Comm comm);

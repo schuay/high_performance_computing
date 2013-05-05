@@ -1,7 +1,7 @@
 #include "binary.h"
 
 int
-bcast_binary(void *buffer,
+bcast_binary(int *buffer,
              int count,
              int root,
              MPI_Comm comm)

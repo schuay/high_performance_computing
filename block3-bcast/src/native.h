@@ -4,7 +4,7 @@
 #include <mpi.h>
 
 int
-bcast_native(void *buffer,
+bcast_native(int *buffer,
              int count,
              int root,
              MPI_Comm comm);
