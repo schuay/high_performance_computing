@@ -12,21 +12,17 @@ START_TEST(name) \
     int rank; \
     MPI_Comm_rank(comm, &rank); \
  \
-    int *data; \
- \
-    if (rank == root) { \
-        data = array_random(seed, n); \
-        fail_unless(data != NULL); \
-    } else { \
-        data = malloc(n * sizeof(int)); \
-        fail_unless(data != NULL); \
-    } \
- \
-    fail_unless(fn(data, n, root, comm) == MPI_SUCCESS);  \
- \
     int *expected = array_random(seed, n); \
     fail_unless(expected != NULL); \
  \
+    int *data = malloc(n * sizeof(int)); \
+    fail_unless(data != NULL); \
+ \
+    if (rank == root) { \
+        memcpy(data, expected, n * sizeof(int)); \
+    } \
+ \
+    fail_unless(fn(data, n, root, comm) == MPI_SUCCESS);  \
     fail_unless(memcmp(expected, data, n * sizeof(int)) == 0); \
  \
     free(data); \
