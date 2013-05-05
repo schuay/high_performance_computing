@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "binary.h"
+#include "binomial.h"
+#include "linear.h"
 #include "native.h"
 #include "util.h"
 
@@ -39,6 +42,33 @@ BCAST_TEST(native06, bcast_native, MPI_COMM_WORLD, 0, 1024, 1)
 BCAST_TEST(native07, bcast_native, MPI_COMM_WORLD, 0, 1024, 2)
 BCAST_TEST(native08, bcast_native, MPI_COMM_WORLD, 0, 1024, 3)
 
+BCAST_TEST(linear01, bcast_linear, MPI_COMM_WORLD, 0, 1, 0)
+BCAST_TEST(linear02, bcast_linear, MPI_COMM_WORLD, 0, 42, 0)
+BCAST_TEST(linear03, bcast_linear, MPI_COMM_WORLD, 0, 128, 0)
+BCAST_TEST(linear04, bcast_linear, MPI_COMM_WORLD, 0, 999, 0)
+BCAST_TEST(linear05, bcast_linear, MPI_COMM_WORLD, 0, 1024, 0)
+BCAST_TEST(linear06, bcast_linear, MPI_COMM_WORLD, 0, 1024, 1)
+BCAST_TEST(linear07, bcast_linear, MPI_COMM_WORLD, 0, 1024, 2)
+BCAST_TEST(linear08, bcast_linear, MPI_COMM_WORLD, 0, 1024, 3)
+
+BCAST_TEST(binary01, bcast_binary, MPI_COMM_WORLD, 0, 1, 0)
+BCAST_TEST(binary02, bcast_binary, MPI_COMM_WORLD, 0, 42, 0)
+BCAST_TEST(binary03, bcast_binary, MPI_COMM_WORLD, 0, 128, 0)
+BCAST_TEST(binary04, bcast_binary, MPI_COMM_WORLD, 0, 999, 0)
+BCAST_TEST(binary05, bcast_binary, MPI_COMM_WORLD, 0, 1024, 0)
+BCAST_TEST(binary06, bcast_binary, MPI_COMM_WORLD, 0, 1024, 1)
+BCAST_TEST(binary07, bcast_binary, MPI_COMM_WORLD, 0, 1024, 2)
+BCAST_TEST(binary08, bcast_binary, MPI_COMM_WORLD, 0, 1024, 3)
+
+BCAST_TEST(binomial01, bcast_binomial, MPI_COMM_WORLD, 0, 1, 0)
+BCAST_TEST(binomial02, bcast_binomial, MPI_COMM_WORLD, 0, 42, 0)
+BCAST_TEST(binomial03, bcast_binomial, MPI_COMM_WORLD, 0, 128, 0)
+BCAST_TEST(binomial04, bcast_binomial, MPI_COMM_WORLD, 0, 999, 0)
+BCAST_TEST(binomial05, bcast_binomial, MPI_COMM_WORLD, 0, 1024, 0)
+BCAST_TEST(binomial06, bcast_binomial, MPI_COMM_WORLD, 0, 1024, 1)
+BCAST_TEST(binomial07, bcast_binomial, MPI_COMM_WORLD, 0, 1024, 2)
+BCAST_TEST(binomial08, bcast_binomial, MPI_COMM_WORLD, 0, 1024, 3)
+
 static Suite *
 create_suite(void)
 {
@@ -53,6 +83,33 @@ create_suite(void)
     tcase_add_test(tc_core, native06);
     tcase_add_test(tc_core, native07);
     tcase_add_test(tc_core, native08);
+
+    tcase_add_test(tc_core, linear01);
+    tcase_add_test(tc_core, linear02);
+    tcase_add_test(tc_core, linear03);
+    tcase_add_test(tc_core, linear04);
+    tcase_add_test(tc_core, linear05);
+    tcase_add_test(tc_core, linear06);
+    tcase_add_test(tc_core, linear07);
+    tcase_add_test(tc_core, linear08);
+
+    tcase_add_test(tc_core, binary01);
+    tcase_add_test(tc_core, binary02);
+    tcase_add_test(tc_core, binary03);
+    tcase_add_test(tc_core, binary04);
+    tcase_add_test(tc_core, binary05);
+    tcase_add_test(tc_core, binary06);
+    tcase_add_test(tc_core, binary07);
+    tcase_add_test(tc_core, binary08);
+
+    tcase_add_test(tc_core, binomial01);
+    tcase_add_test(tc_core, binomial02);
+    tcase_add_test(tc_core, binomial03);
+    tcase_add_test(tc_core, binomial04);
+    tcase_add_test(tc_core, binomial05);
+    tcase_add_test(tc_core, binomial06);
+    tcase_add_test(tc_core, binomial07);
+    tcase_add_test(tc_core, binomial08);
 
     suite_add_tcase(s, tc_core);
 
