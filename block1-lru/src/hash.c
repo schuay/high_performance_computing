@@ -9,7 +9,8 @@ typedef struct {
 } hash_entry_t;
 
 struct __hash_t {
-    hash_entry_t *h;
+    hash_entry_t *h;    /* The hash head. */
+    hash_entry_t *free; /* A free (unused) hash entry struct, used for performance optimization. */
 };
 
 hash_t *
@@ -24,7 +25,10 @@ hash_insert(hash_t *hash,
             const uint64_t in,
             uint64_t *out)
 {
-    hash_entry_t *e = malloc(sizeof(hash_entry_t));
+    hash_entry_t *e = hash->free;
+    if (e == NULL) {
+        e = malloc(sizeof(hash_entry_t));
+    }
     if (e == NULL) {
         return -1;
     }
@@ -36,7 +40,7 @@ hash_insert(hash_t *hash,
     HASH_REPLACE(hh, hash->h, k, sizeof(e->k), e, d);
 
     *out = (d == NULL) ? HASH_NOT_FOUND : d->v;
-    free(d);
+    hash->free = d;
 
     return 0;
 }
@@ -51,5 +55,6 @@ hash_free(hash_t *hash)
         free(curr);
     }
 
+    free(hash->free);
     free(hash);
 }
