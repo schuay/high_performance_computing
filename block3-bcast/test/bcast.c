@@ -30,7 +30,14 @@ START_TEST(name) \
 } \
 END_TEST
 
-BCAST_TEST(native01, bcast_native, MPI_COMM_WORLD, 0, 42, 0)
+BCAST_TEST(native01, bcast_native, MPI_COMM_WORLD, 0, 1, 0)
+BCAST_TEST(native02, bcast_native, MPI_COMM_WORLD, 0, 42, 0)
+BCAST_TEST(native03, bcast_native, MPI_COMM_WORLD, 0, 128, 0)
+BCAST_TEST(native04, bcast_native, MPI_COMM_WORLD, 0, 999, 0)
+BCAST_TEST(native05, bcast_native, MPI_COMM_WORLD, 0, 1024, 0)
+BCAST_TEST(native06, bcast_native, MPI_COMM_WORLD, 0, 1024, 1)
+BCAST_TEST(native07, bcast_native, MPI_COMM_WORLD, 0, 1024, 2)
+BCAST_TEST(native08, bcast_native, MPI_COMM_WORLD, 0, 1024, 3)
 
 static Suite *
 create_suite(void)
@@ -39,6 +46,13 @@ create_suite(void)
     TCase *tc_core = tcase_create("core");
 
     tcase_add_test(tc_core, native01);
+    tcase_add_test(tc_core, native02);
+    tcase_add_test(tc_core, native03);
+    tcase_add_test(tc_core, native04);
+    tcase_add_test(tc_core, native05);
+    tcase_add_test(tc_core, native06);
+    tcase_add_test(tc_core, native07);
+    tcase_add_test(tc_core, native08);
 
     suite_add_tcase(s, tc_core);
 
