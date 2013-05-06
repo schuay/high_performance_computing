@@ -1,6 +1,9 @@
 #include "binomial.h"
 
+#include <stdio.h>
 #include <stdlib.h>
+
+#define TAG (42)
 
 typedef struct __node_t {
     struct __node_t *parent;
@@ -17,6 +20,10 @@ _node_create_subtree(node_t *parent,
                      const int order,
                      const int index);
 
+static const node_t *
+_node_find(const node_t *node,
+           const int index);
+
 static void
 _node_free(node_t *node);
 
@@ -26,10 +33,53 @@ bcast_binomial(int *buffer,
                int root,
                MPI_Comm comm)
 {
-    node_t *node = _node_create(count);
+    int ret;
+    
+    int size, rank;
+    MPI_Comm_size(comm, &size);
+    MPI_Comm_rank(comm, &rank);
+
+    /* 0-based rank for easier tree calculations. */
+    const int rank0 = (rank + size - root) % size;
+
+    node_t *node = _node_create(size);
+    if (node == NULL) {
+        return -1;
+    }
+
+    const node_t *self = _node_find(node, rank0);
+    if (self == NULL) {
+        ret = -1;
+        goto out;
+    }
+
+    const int parent = (self->parent == NULL) ? -1 : (root + self->parent->index) % size;
+    if (rank != root) {
+        ret = MPI_Recv(buffer, count, MPI_INT, parent, TAG, comm, MPI_STATUS_IGNORE);
+        if (ret != MPI_SUCCESS) {
+            ret = -1;
+            goto out;
+        }
+    }
+
+    for (int i = self->order - 1; i >= 0; i--) {
+        if (self->children[i] == NULL) {
+            continue;
+        }
+
+        const int child = (root + self->children[i]->index) % size;
+        ret = MPI_Send(buffer, count, MPI_INT, child, TAG, comm);
+        if (ret != MPI_SUCCESS) {
+            ret = -1;
+            goto out;
+        }
+    }
+
+    ret = 0;
+out:
     _node_free(node);
 
-    return -1;
+    return ret;
 }
 
 static node_t *
@@ -74,6 +124,27 @@ _node_create_subtree(node_t *parent,
     }
 
     return self;
+}
+
+static const node_t *
+_node_find(const node_t *node,
+           const int index)
+{
+    if (node == NULL) {
+        return NULL;
+    }
+
+    if (index == node->index) {
+        return node;
+    }
+
+    for (int i = node->order - 1; i >= 0; i--) {
+        if (index >= node->children[i]->index) {
+            return _node_find(node->children[i], index);
+        }
+    }
+
+    return NULL;
 }
 
 static void
