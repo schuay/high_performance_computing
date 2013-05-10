@@ -1,4 +1,5 @@
 *.swp
+.ssh-cfg
 build/
 html/
 latex/

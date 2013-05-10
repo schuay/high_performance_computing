@@ -3,24 +3,22 @@ SSH = ssh
 SCP = scp
 
 SFLAGS = -F "../.ssh-cfg"
-RFLAGS = --recursive --progress --copy-links --exclude=build/ -e "$(SSH) $(SFLAGS)" --exclude 'matrix_*'
+RFLAGS = --recursive --progress --copy-links --exclude=build/ -e "$(SSH) $(SFLAGS)"
 
 HOST = jupiter
-REMOTEDIR = ~/project3-stencil
-SOURCE = . ../common
+REMOTEDIR = ~/block3-bcast
+SOURCE = .
 
 CSV_FILE = data/bench.csv
 PROCESS_COUNTS = 20 80 160 320 500
 ITERATION_COUNTS = 10 100 1000
-RS = 1 2 5 10 20
-M=1000
 N=1000
-SEED=5
+SEED=0
 HOSTS=jupiter0,jupiter1,jupiter2,jupiter3,jupiter4,jupiter5,jupiter6,jupiter7,jupiter8,jupiter9,jupiter10,jupiter11,jupiter12,jupiter13,jupiter14,jupiter15,jupiter16,jupiter17,jupiter18,jupiter19,jupiter20,jupiter21,jupiter22,jupiter23,jupiter24,jupiter25,jupiter26,jupiter27,jupiter28,jupiter29,jupiter30,jupiter31,jupiter32,jupiter33,jupiter34,jupiter35
 
 bake:
 	mkdir -p build
-	cd build; cmake -DCMAKE_BUILD_TYPE="Debug" ..; make -j3
+	cd build; cmake -DCMAKE_BUILD_TYPE="Debug" ..; make -j6
 
 check: bake
 	cd build; CK_FORK=no ctest --output-on-failure
@@ -28,19 +26,11 @@ check: bake
 bench: bake
 	mkdir -p data
 	for ITERS in $(ITERATION_COUNTS); do \
-		build/stencil_ref $(CSV_FILE) $(M) $(N) $(SEED) $${ITERS}; \
 		for P in $(PROCESS_COUNTS); do \
-			for R in $(RS); do \
-				mpiexec -host $(HOSTS) \
-					-loadbalance \
-					-np $${P} \
-					build/stencil_bench \
-					$(CSV_FILE) \
-					$(M) $(N) \
-					$${R} $$(( $${P} / $${R} )) \
-					$(SEED) \
-					$${ITERS}; \
-			done \
+			mpiexec -host $(HOSTS) \
+				-loadbalance \
+				-np $${P} \
+				build/src/bcast_bench -almo -s $(SEED) -n $(N) > $(CSV_FILE); \
 		done \
 	done
 
