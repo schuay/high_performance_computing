@@ -240,6 +240,87 @@ START_TEST(test_insert_adjacent2_balance2)
 }
 END_TEST
 
+START_TEST(test_merge_r_in_r_subtree)
+{
+    itree_t *root = NULL;
+    uint64_t holes;
+    fail_unless(itree_insert(10, &root, &holes) == 0);
+    fail_unless(itree_insert(8, &root, &holes) == 0);
+    fail_unless(itree_insert(12, &root, &holes) == 0);
+    fail_unless(itree_insert(14, &root, &holes) == 0);
+    fail_unless(itree_insert(11, &root, &holes) == 0);
+    fail_unless(holes == 2);
+    itree_print(root);
+    CHK_NODE(root, == 10, == 12, == 1, != NULL, != NULL, == 1);
+    CHK_NODE(root->l, == 8, == 8, == 0, == NULL, == NULL, == 0);
+    CHK_NODE(root->r, == 14, == 14, == 0, == NULL, == NULL, == 0);
+    itree_free(root);
+}
+END_TEST
+
+START_TEST(test_merge_l_in_r_subtree)
+{
+    itree_t *root = NULL;
+    uint64_t holes;
+    fail_unless(itree_insert(10, &root, &holes) == 0);
+    fail_unless(itree_insert(5, &root, &holes) == 0);
+    fail_unless(itree_insert(16, &root, &holes) == 0);
+    fail_unless(itree_insert(3, &root, &holes) == 0);
+    fail_unless(itree_insert(12, &root, &holes) == 0);
+    fail_unless(itree_insert(18, &root, &holes) == 0);
+    fail_unless(itree_insert(14, &root, &holes) == 0);
+    fail_unless(itree_insert(11, &root, &holes) == 0);
+    fail_unless(holes == 4);
+    CHK_NODE(root, == 10, == 12, == 3, != NULL, != NULL, == 2);
+    CHK_NODE(root->l, == 5, == 5, == 0, != NULL, == NULL, == 1);
+    CHK_NODE(root->l->l, == 3, == 3, == 0, == NULL, == NULL, == 0);
+    CHK_NODE(root->r, == 16, == 16, == 1, != NULL, != NULL, == 1);
+    CHK_NODE(root->r->l, == 14, == 14, == 0, == NULL, == NULL, == 0);
+    CHK_NODE(root->r->r, == 18, == 18, == 0, == NULL, == NULL, == 0);
+    itree_free(root);
+}
+END_TEST
+
+START_TEST(test_merge_r_in_l_subtree)
+{
+    itree_t *root = NULL;
+    uint64_t holes;
+    fail_unless(itree_insert(10, &root, &holes) == 0);
+    fail_unless(itree_insert(4, &root, &holes) == 0);
+    fail_unless(itree_insert(12, &root, &holes) == 0);
+    fail_unless(itree_insert(1, &root, &holes) == 0);
+    fail_unless(itree_insert(8, &root, &holes) == 0);
+    fail_unless(itree_insert(14, &root, &holes) == 0);
+    fail_unless(itree_insert(6, &root, &holes) == 0);
+    fail_unless(itree_insert(9, &root, &holes) == 0);
+    fail_unless(holes == 3);
+    CHK_NODE(root, == 8, == 10, == 2, != NULL, != NULL, == 2);
+    CHK_NODE(root->l, == 4, == 4, == 1, != NULL, != NULL, == 1);
+    CHK_NODE(root->l->l, == 1, == 1, == 0, == NULL, == NULL, == 0);
+    CHK_NODE(root->l->r, == 6, == 6, == 0, == NULL, == NULL, == 0);
+    CHK_NODE(root->r, == 12, == 12, == 1, == NULL, != NULL, == 1);
+    CHK_NODE(root->r->r, == 14, == 14, == 0, == NULL, == NULL, == 0);
+    itree_free(root);
+}
+END_TEST
+
+START_TEST(test_merge_l_in_l_subtree)
+{
+    itree_t *root = NULL;
+    uint64_t holes;
+    fail_unless(itree_insert(10, &root, &holes) == 0);
+    fail_unless(itree_insert(8, &root, &holes) == 0);
+    fail_unless(itree_insert(12, &root, &holes) == 0);
+    fail_unless(itree_insert(6, &root, &holes) == 0);
+    fail_unless(itree_insert(9, &root, &holes) == 0);
+    fail_unless(holes == 2);
+    CHK_NODE(root, == 8, == 10, == 1, != NULL, != NULL, == 1);
+    CHK_NODE(root->l, == 6, == 6, == 0, == NULL, == NULL, == 0);
+    CHK_NODE(root->r, == 12, == 12, == 0, == NULL, == NULL, == 0);
+    itree_free(root);
+}
+END_TEST
+
 TEST_SINGLE_EXTENSION(2, 15)
 TEST_SINGLE_EXTENSION(4, 14)
 TEST_SINGLE_EXTENSION(5, 14)
@@ -339,26 +420,33 @@ create_suite(void)
     tcase_add_test(tc_sext, test_insert_single_extension_holes46);
 
     TCase *tc_dext = tcase_create("dext");
-    tcase_add_test(tc_sext, test_insert_double_extension_holes1);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes3);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes5);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes7);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes9);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes11);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes13);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes15);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes17);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes19);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes21);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes23);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes25);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes27);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes29);
-    tcase_add_test(tc_sext, test_insert_double_extension_holes31);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes1);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes3);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes5);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes7);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes9);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes11);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes13);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes15);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes17);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes19);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes21);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes23);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes25);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes27);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes29);
+    tcase_add_test(tc_dext, test_insert_double_extension_holes31);
+
+    TCase *tc_merge = tcase_create("merge");
+    tcase_add_test(tc_merge, test_merge_r_in_r_subtree);
+    tcase_add_test(tc_merge, test_merge_l_in_r_subtree);
+    tcase_add_test(tc_merge, test_merge_r_in_l_subtree);
+    tcase_add_test(tc_merge, test_merge_l_in_l_subtree);
 
     suite_add_tcase(s, tc_core);
     suite_add_tcase(s, tc_sext);
     suite_add_tcase(s, tc_dext);
+    suite_add_tcase(s, tc_merge);
 
     return s;
 }
