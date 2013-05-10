@@ -340,7 +340,7 @@ _itree_descend_r(const uint64_t index,
 
     /* Adjust the subtree sum after a merge. */
     if (util->l != NULL && util->l != droot) {
-        droot->v -= util->l->v + util->l->k2 - util->l->k1 + 1;
+        droot->v -= util->l->k2 - util->l->k1 + 1;
     }
 
     return 0;
