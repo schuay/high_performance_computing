@@ -301,7 +301,8 @@ _itree_descend_l(const uint64_t index,
 
     /* Remove the lower node. */
     if (util->l != NULL && util->l == droot->l) {
-        droot->l = util->l->r;
+        const int in_left_subtree = (index == util->l->k2 + 1);
+        droot->l = in_left_subtree ? util->l->l : util->l->r;
     }
 
     return 0;
@@ -333,7 +334,8 @@ _itree_descend_r(const uint64_t index,
 
     /* Remove the lower node. */
     if (util->l != NULL && util->l == droot->r) {
-        droot->r = util->l->l;
+        const int in_left_subtree = (index == util->l->k2 + 1);
+        droot->r = in_left_subtree ? util->l->l : util->l->r;
     }
 
     /* Adjust the subtree sum after a merge. */
