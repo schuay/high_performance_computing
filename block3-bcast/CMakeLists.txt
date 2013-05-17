@@ -1,5 +1,8 @@
-cmake_minimum_required(VERSION 2.8.0)
+cmake_minimum_required(VERSION 2.6.4)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/../CMakeModules/")
+set(CMAKE_PROGRAM_PATH ${CMAKE_PROGRAM_PATH} /opt/NECmpi/gcc/1.2.6/bin64/)
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /opt/NECmpi/gcc/1.2.6/lib/)
+set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} /opt/NECmpi/gcc/1.2.6/include/)
 
 project(block3-bcast)
 
@@ -17,10 +20,7 @@ endif()
 # MPI_C_LIBRARIES. Hack in a fix here:
 if(NOT DEFINED MPI_C_LIBRARIES)
     set(MPI_C_LIBRARIES
-        /usr/lib/libmpich.so
-        /usr/lib/libopa.a
-        /usr/lib/libpthread.so
-        /usr/lib/librt.so)
+        /opt/NECmpi/gcc/1.2.6/lib64/libmpi.so)
 endif()
 
 add_subdirectory(src)
