@@ -3,6 +3,9 @@
 
 #include <mpi.h>
 
+void
+linear_block_size(const int size);
+
 int
 bcast_linear(int *buffer,
              int count,

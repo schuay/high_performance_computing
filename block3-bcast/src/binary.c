@@ -2,7 +2,13 @@
 
 #include "util.h"
 
-#define BLOCK_SIZE (1024)
+static int block_size = 1024;
+
+void
+binary_block_size(const int size)
+{
+    block_size = size;
+}
 
 int
 bcast_binary(int *buffer,
@@ -31,8 +37,8 @@ bcast_binary(int *buffer,
     const int r = (root + r0) % size;
 
     if (rank == root) {
-        for (int i = 0; i < count; i += BLOCK_SIZE) {
-            const int n = MIN(BLOCK_SIZE, count - i);
+        for (int i = 0; i < count; i += block_size) {
+            const int n = MIN(block_size, count - i);
 
             if (has_l) {
                 ret = MPI_Send(buffer + i, n, MPI_INT, l, i, comm);
@@ -49,7 +55,7 @@ bcast_binary(int *buffer,
             }
         }
     } else {
-        int n = MIN(BLOCK_SIZE, count);
+        int n = MIN(block_size, count);
 
         ret = MPI_Recv(buffer, n, MPI_INT, parent, 0, comm, MPI_STATUS_IGNORE);
         if (ret != MPI_SUCCESS) {
@@ -57,8 +63,8 @@ bcast_binary(int *buffer,
         }
 
         int last_i = 0, last_n = n;
-        for (int i = BLOCK_SIZE; i < count; i += BLOCK_SIZE) {
-            n = MIN(BLOCK_SIZE, count - i);
+        for (int i = block_size; i < count; i += block_size) {
+            n = MIN(block_size, count - i);
 
             if (has_l) {
                 ret = MPI_Send(buffer + last_i, last_n, MPI_INT, l, last_i, comm);

@@ -11,6 +11,7 @@
 
 #define DEFAULT_SEED (0)
 #define DEFAULT_N (1048576)
+#define DEFAULT_BLOCK_SIZE (1024)
 #define ROOT (0)
 
 #define SAFE_BENCH(name, fn, data, n) do { \
@@ -38,8 +39,9 @@ usage(void)
                     "   -m: Run the native MPI broadcast (Default: N)\n"
                     "   -o: Run the binomial broadcast (Default: N)\n"
                     "   -s: The seed used for generating test data (Default: %d)\n"
-                    "   -n: The length of the generated test array (Default: %d)\n",
-            DEFAULT_SEED, DEFAULT_N);
+                    "   -n: The length of the generated test array (Default: %d)\n"
+                    "   -b: The block size of pipelined algorithms (Default: %d)\n",
+            DEFAULT_SEED, DEFAULT_N, DEFAULT_BLOCK_SIZE);
     exit(EXIT_FAILURE);
 }
 
@@ -76,11 +78,18 @@ main(int argc, char **argv)
     int algs = 0;
     int seed = DEFAULT_SEED;
     int n = DEFAULT_N;
+    int block_size = DEFAULT_BLOCK_SIZE;
     int ret = 0;
 
     int opt;
-    while ((opt = getopt(argc, argv, "loams:n:")) != -1) {
+    while ((opt = getopt(argc, argv, "loamb:s:n:")) != -1) {
         switch (opt) {
+        case 'b':
+            block_size = strtol(optarg, NULL, 10);
+            if (errno != 0) {
+                usage();
+            }
+            break;
         case 's':
             seed = strtol(optarg, NULL, 10);
             if (errno != 0) {
@@ -125,6 +134,7 @@ main(int argc, char **argv)
     MPI_Init(&argc, &argv);
 
     if (algs & ALG_LINEAR) {
+        linear_block_size(block_size);
         SAFE_BENCH("linear", bcast_linear, data, n);
     }
 
@@ -133,6 +143,7 @@ main(int argc, char **argv)
     }
 
     if (algs & ALG_BINARY) {
+        binary_block_size(block_size);
         SAFE_BENCH("binary", bcast_binary, data, n);
     }
 

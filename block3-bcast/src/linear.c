@@ -2,7 +2,13 @@
 
 #include "util.h"
 
-#define BLOCK_SIZE (1024)
+static int block_size = 1024;
+
+void
+linear_block_size(const int size)
+{
+    block_size = size;
+}
 
 int
 bcast_linear(int *buffer,
@@ -21,8 +27,8 @@ bcast_linear(int *buffer,
     const int last = (root + size - 1) % size;
 
     if (rank == root) {
-        for (int i = 0; i < count; i += BLOCK_SIZE) {
-            const int n = MIN(BLOCK_SIZE, count - i);
+        for (int i = 0; i < count; i += block_size) {
+            const int n = MIN(block_size, count - i);
 
             ret = MPI_Send(buffer + i, n, MPI_INT, next, i, comm);
             if (ret != MPI_SUCCESS) {
@@ -30,8 +36,8 @@ bcast_linear(int *buffer,
             }
         }
     } else if (rank == last) {
-        for (int i = 0; i < count; i += BLOCK_SIZE) {
-            const int n = MIN(BLOCK_SIZE, count - i);
+        for (int i = 0; i < count; i += block_size) {
+            const int n = MIN(block_size, count - i);
 
             ret = MPI_Recv(buffer + i, n, MPI_INT, prev, i, comm, MPI_STATUS_IGNORE);
             if (ret != MPI_SUCCESS) {
@@ -39,7 +45,7 @@ bcast_linear(int *buffer,
             }
         }
     } else {
-        int n = MIN(BLOCK_SIZE, count);
+        int n = MIN(block_size, count);
 
         ret = MPI_Recv(buffer, n, MPI_INT, prev, 0, comm, MPI_STATUS_IGNORE);
         if (ret != MPI_SUCCESS) {
@@ -47,8 +53,8 @@ bcast_linear(int *buffer,
         }
 
         int last_i = 0, last_n = n;
-        for (int i = BLOCK_SIZE; i < count; i += BLOCK_SIZE) {
-            n = MIN(BLOCK_SIZE, count - i);
+        for (int i = block_size; i < count; i += block_size) {
+            n = MIN(block_size, count - i);
 
             ret = MPI_Sendrecv(
                     buffer + last_i, last_n, MPI_INT, next, last_i,
