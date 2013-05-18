@@ -66,7 +66,7 @@ bench(const char *name,
     MPI_Reduce(&local_elapsed, &total_elapsed, 1, MPI_DOUBLE, MPI_MAX, ROOT, MPI_COMM_WORLD);
 
     if (rank == ROOT) {
-        printf("%s, %d, %d, %f\n", name, size, n, total_elapsed);
+        printf("%8s, %4d, %9d, %f\n", name, size, n, total_elapsed);
     }
 
     return 0;
