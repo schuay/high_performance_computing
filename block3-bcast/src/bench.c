@@ -49,7 +49,8 @@ bench(const char *name,
       int *data,
       const int n)
 {
-    int rank;
+    int size, rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     const double start = MPI_Wtime();
@@ -63,7 +64,7 @@ bench(const char *name,
     MPI_Reduce(&local_elapsed, &total_elapsed, 1, MPI_DOUBLE, MPI_MAX, ROOT, MPI_COMM_WORLD);
 
     if (rank == ROOT) {
-        printf("%s, %d, %f\n", name, n, total_elapsed);
+        printf("%s, %d, %d, %f\n", name, size, n, total_elapsed);
     }
 
     return 0;
