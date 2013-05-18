@@ -63,7 +63,7 @@ bcast_binomial(int *buffer,
     }
 
     for (int i = self->order - 1; i >= 0; i--) {
-        if (self->children[i] == NULL) {
+        if (self->children[i] == NULL || self->children[i]->index >= size) {
             continue;
         }
 
