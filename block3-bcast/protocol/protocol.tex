@@ -41,7 +41,33 @@
 
 \section{Introduction} \label{section:introduction}
 
+In this assignment, we implemented three different broadcast algorithms and
+subsequently benchmarked and compared these against the \lstinline|MPI_Bcast|
+implementation in NEC MPI.
+
 \section{Results}
+
+The following results were obtained by benchmarking with NECmpi on the Jupiter system. The
+application was compiled using gcc 4.4.7 with
+
+\begin{verbatim}
+CFLAGS = -Wall -Wextra -pedantic -std=c99 -D_GNU_SOURCE -O3
+\end{verbatim}
+
+A benchmark run can be started by using the \verb|make bench| and \verb|make bench-bs|
+targets in our makefile. Results are written to \verb|results/bench.csv|.
+
+\begin{comment}
+TODO: "Estimate best block size using measured alpha and beta"??
+TODO: "Verify/falsify claims of lecture"
+TODO: "Estimate parameter ranges (processes, data sizes) for which algorithms are ideal.
+TODO: Random communicator??
+TODO: How to avoid performance problems (random communicators), which means MPI provides (NONE?)
+Show graphs.
+Briefly describe algorithms.
+Best block sizes for linear/binary.
+\end{comment}
+
 
 \section{Analysis}
 
