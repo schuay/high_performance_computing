@@ -1,15 +1,15 @@
-PROJECT = protocol
+R = R
+LATEX = pdflatex
 
-#------------------------------------------------------------------------------
-protocol:
-#------------------------------------------------------------------------------
-	pdflatex $(PROJECT)
-	pdflatex $(PROJECT)
+RFILE = protocol.Rnw
+LFILE = $(RFILE:.Rnw=.tex)
 
+all:
+	$(R) CMD Sweave $(RFILE)
+	$(LATEX) $(LFILE)
+	$(LATEX) $(LFILE)
 
-#------------------------------------------------------------------------------
 clean:
-#------------------------------------------------------------------------------
-	rm -f *.aux $(PROJECT).bbl $(PROJECT).blg $(PROJECT).log $(PROJECT).dvi \
-		$(PROJECT).toc $(PROJECT).pdf $(PROJECT).ps $(PROJECT).out
+	rm -f *.aux *.bbl *.blg *.log *.dvi \
+		*.toc *.pdf *.ps *.out
 

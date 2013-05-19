@@ -68,6 +68,10 @@ Briefly describe algorithms.
 Best block sizes for linear/binary.
 \end{comment}
 
+<<results=tex, echo=FALSE>>=
+\SweaveInput{functions.Rnw}
+plotResults("../results/bench.csv")
+@
 
 \section{Analysis}
 

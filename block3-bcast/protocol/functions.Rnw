@@ -1,0 +1,45 @@
+fidx <- 0
+
+texPlot <- function(x, y, pch, text, xlab, ylab, main, log, ylim=NULL) {
+    file=paste("graph", fidx, ".eps", sep="")  
+    fidx <<- fidx + 1
+
+    postscript(file=file, paper="special", width=8, height=8, horizontal=FALSE)  
+
+    matplot(x,y, pch=pch, type='b', xlab=xlab, ylab=ylab, ylim=ylim, main=main, log=log)
+    legend("topleft", text, col=pch, pch=pch)
+
+    dev.off()  
+
+    cat("\\includegraphics{", file, "}\n\n", sep="")
+}
+
+plotByNumThreads <- function(par, prefix) {
+    pars <- split(par, par$alg)
+    pch <- 1:length(pars)
+
+    # Add each data range to our vectors.
+    # The <<- operator affects variables in higher scopes.
+    addPar <- function(p) {
+        if (nrow(p) > 0) {
+            x <<- cbind(x,p$n)
+            y <<- cbind(y,p$x)
+            nThreads <<- p[1,2]
+            txt <<- c(txt,as.character(p[1,1]))
+        }
+    }
+    nThreads <- 1
+    txt <- NULL
+    x <- NULL
+    y <- NULL
+    sapply(pars, FUN=addPar)
+
+    texPlot(x,y, pch, txt, "input size", "time(s)", sprintf("%s: Time as function of input size (%d thread(s))", prefix, nThreads), "xy")
+}
+
+plotResults <- function(filename) {
+    c <- read.csv(filename, header = FALSE, col.names = c("alg", "p", "n", "t"))
+    mc <- aggregate(c[,c("t")], c[,c("alg", "p", "n")], min)
+    byNumThreads <- split(mc, mc$p)
+    unused <- sapply(byNumThreads, FUN=plotByNumThreads, "Min")
+}
