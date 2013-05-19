@@ -66,6 +66,12 @@ bcast_binary(int *buffer,
         for (int i = block_size; i < count; i += block_size) {
             n = MIN(block_size, count - i);
 
+            MPI_Request request;
+            ret = MPI_Irecv(buffer + i, n, MPI_INT, parent, i, comm, &request);
+            if (ret != MPI_SUCCESS) {
+                return -1;
+            }
+
             if (has_l) {
                 ret = MPI_Send(buffer + last_i, last_n, MPI_INT, l, last_i, comm);
                 if (ret != MPI_SUCCESS) {
@@ -80,9 +86,7 @@ bcast_binary(int *buffer,
                 }
             }
 
-            /* TODO: Async receive. */
-
-            ret = MPI_Recv(buffer + i, n, MPI_INT, parent, i, comm, MPI_STATUS_IGNORE);
+            ret = MPI_Wait(&request, MPI_STATUS_IGNORE);
             if (ret != MPI_SUCCESS) {
                 return -1;
             }
