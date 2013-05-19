@@ -13,7 +13,7 @@ set(CMAKE_C_COMPILE_FLAGS ${CMAKE_C_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 set(CMAKE_C_LINK_FLAGS ${CMAKE_C_LINK_FLAGS} ${MPI_LINK_FLAGS})
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    add_definitions("-Wall -Wextra -pedantic -std=c99 -D_GNU_SOURCE")
+    add_definitions("-Wall -Wextra -pedantic -std=c99 -D_GNU_SOURCE -O3")
 endif()
 
 # Saturn still has old an FindMPI.cmake version without
