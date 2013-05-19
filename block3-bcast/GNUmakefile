@@ -15,6 +15,7 @@ SOURCE = .
 
 BENCH_DIR = results
 BENCH_FILE = $(BENCH_DIR)/bench.csv
+BLOCK_SIZES = 512 1024 4096 8192 16384 32768 65536
 PROCESS_COUNTS = 20 80 160 320 500 576
 NS = 1000000 1048576 4000000 4194304 5000000 16777216 40000000 67108864 111111111 268435456
 SEED=0
@@ -39,6 +40,23 @@ bench: bake
 			if [ "x$$?" != "x0" ]; then \
 				exit 1; \
 			fi \
+		done \
+	done
+
+bench-bs: bake
+	mkdir -p $(BENCH_DIR)
+	for BLOCK_SIZE in $(BLOCK_SIZES); do \
+		for N in $(NS); do \
+			for P in $(PROCESS_COUNTS); do \
+				echo N: $${N} P: $${P} BLOCK_SIZE: $${BLOCK_SIZE}...; \
+				MPILX_NODELIST="$(HOSTS)" mpiexec \
+					-node 0-35 \
+					-n $${P} \
+					build/src/bcast_bench -al -s $(SEED) -n $${N} -b $${BLOCK_SIZE} >> $(BENCH_DIR)/bs$${BLOCK_SIZE}.csv; \
+				if [ "x$$?" != "x0" ]; then \
+					exit 1; \
+				fi \
+			done \
 		done \
 	done
 
