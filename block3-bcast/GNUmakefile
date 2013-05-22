@@ -17,7 +17,7 @@ BENCH_DIR = results
 BENCH_FILE = $(BENCH_DIR)/bench.csv
 BLOCK_SIZES = 512 1024 4096 8192 16384 32768 65536
 PROCESS_COUNTS = 20 80 160 320 500 576
-NS = 1000000 1048576 4000000 4194304 5000000 16777216 40000000 67108864 111111111 268435456
+NS = 256 1000 4095 8193 16384 65536 262000 600000 1000000 1048576 4000000 4194304 5000000 16777216 40000000 67108864 111111111
 SEED=0
 HOSTS=jupiter0,jupiter1,jupiter2,jupiter3,jupiter4,jupiter5,jupiter6,jupiter7,jupiter8,jupiter9,jupiter10,jupiter11,jupiter12,jupiter13,jupiter14,jupiter15,jupiter16,jupiter17,jupiter18,jupiter19,jupiter20,jupiter21,jupiter22,jupiter23,jupiter24,jupiter25,jupiter26,jupiter27,jupiter28,jupiter29,jupiter30,jupiter31,jupiter32,jupiter33,jupiter34,jupiter35
 
