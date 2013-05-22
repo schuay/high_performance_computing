@@ -45,6 +45,20 @@ In this assignment, we implemented three different broadcast algorithms and
 subsequently benchmarked and compared these against the \lstinline|MPI_Bcast|
 implementation in NEC MPI.
 
+The \emph{linear pipeline} algorithm partitions the data range into small segments,
+and structures all processes in a linear queue. Root begins by transmitting
+the first segment, and in each subsequent round each process simultaneously receives
+one segment from its predecessor and sends the segment received in the previous
+round on to its successor.
+
+The \emph{pipelined binary tree} is similar, except processes are structured as a
+binary tree. A round consists of each process receiving a segment from its parent,
+and passing the previous segment to both child processes.
+
+In the \emph{binomial tree} algorithm, the properties of a binomial tree
+are exploited in order to maximize the work done by all processes during each round.
+Unlike the others, this algorithm is not pipelined.
+
 \section{Results}
 
 The following results were obtained by benchmarking with NECmpi on the Jupiter system. The
@@ -55,7 +69,14 @@ CFLAGS = -Wall -Wextra -pedantic -std=c99 -D_GNU_SOURCE -O3
 \end{verbatim}
 
 A benchmark run can be started by using the \verb|make bench| and \verb|make bench-bs|
-targets in our makefile. Results are written to \verb|results/bench.csv|.
+targets in our makefile. Results are then written to \verb|results/bench.csv|.
+
+Random communicators were created using the following code:
+
+\begin{lstlisting}
+srand(time(NULL) + getpid());
+MPI_Comm_split(MPI_COMM_WORLD, 1, rand(), &comm);
+\end{lstlisting}
 
 \begin{comment}
 TODO: "Estimate best block size using measured alpha and beta"??
@@ -64,7 +85,6 @@ TODO: "Estimate parameter ranges (processes, data sizes) for which algorithms ar
 TODO: Random communicator??
 TODO: How to avoid performance problems (random communicators), which means MPI provides (NONE?)
 Show graphs.
-Briefly describe algorithms.
 Best block sizes for linear/binary.
 \end{comment}
 
