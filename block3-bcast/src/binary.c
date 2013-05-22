@@ -2,7 +2,7 @@
 
 #include "util.h"
 
-static int block_size = 65536;
+static int block_size = 1024;
 
 void
 binary_block_size(const int size)

@@ -11,7 +11,7 @@
 
 #define DEFAULT_SEED (0)
 #define DEFAULT_N (1048576)
-#define DEFAULT_BLOCK_SIZE (65536)
+#define DEFAULT_BLOCK_SIZE (1024)
 #define ROOT (0)
 
 #define SAFE_BENCH(name, fn, data, n, comm) do { \
