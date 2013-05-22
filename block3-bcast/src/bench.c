@@ -14,8 +14,8 @@
 #define DEFAULT_BLOCK_SIZE (65536)
 #define ROOT (0)
 
-#define SAFE_BENCH(name, fn, data, n) do { \
-    if (bench(name, fn, data, n) != 0) { \
+#define SAFE_BENCH(name, fn, data, n, comm) do { \
+    if (bench(name, fn, data, n, comm) != 0) { \
         ret = -1; \
         goto out; \
     } \
@@ -49,21 +49,22 @@ static int
 bench(const char *name,
       bcast_t bcast_fn,
       int *data,
-      const int n)
+      const int n,
+      MPI_Comm comm)
 {
     int size, rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(comm, &size);
+    MPI_Comm_rank(comm, &rank);
 
     const double start = MPI_Wtime();
-    if (bcast_fn(data, n, ROOT, MPI_COMM_WORLD) != MPI_SUCCESS) {
+    if (bcast_fn(data, n, ROOT, comm) != MPI_SUCCESS) {
         fprintf(stderr, "%s failed\n", name);
         return -1;
     }
     double local_elapsed = MPI_Wtime() - start;
 
     double total_elapsed;
-    MPI_Reduce(&local_elapsed, &total_elapsed, 1, MPI_DOUBLE, MPI_MAX, ROOT, MPI_COMM_WORLD);
+    MPI_Reduce(&local_elapsed, &total_elapsed, 1, MPI_DOUBLE, MPI_MAX, ROOT, comm);
 
     if (rank == ROOT) {
         printf("%8s, %4d, %9d, %f\n", name, size, n, total_elapsed);
@@ -135,20 +136,20 @@ main(int argc, char **argv)
 
     if (algs & ALG_LINEAR) {
         linear_block_size(block_size);
-        SAFE_BENCH("linear", bcast_linear, data, n);
+        SAFE_BENCH("linear", bcast_linear, data, n, MPI_COMM_WORLD);
     }
 
     if (algs & ALG_BINOMIAL) {
-        SAFE_BENCH("binomial", bcast_binomial, data, n);
+        SAFE_BENCH("binomial", bcast_binomial, data, n, MPI_COMM_WORLD);
     }
 
     if (algs & ALG_BINARY) {
         binary_block_size(block_size);
-        SAFE_BENCH("binary", bcast_binary, data, n);
+        SAFE_BENCH("binary", bcast_binary, data, n, MPI_COMM_WORLD);
     }
 
     if (algs & ALG_NATIVE) {
-        SAFE_BENCH("native", bcast_native, data, n);
+        SAFE_BENCH("native", bcast_native, data, n, MPI_COMM_WORLD);
     }
 
 out:
