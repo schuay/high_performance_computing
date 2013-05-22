@@ -129,6 +129,7 @@ main(int argc, char **argv)
     }
 
     /* TODO: Non-well behaved communicator benchmarks. */
+    MPI_Init(&argc, &argv);
 
     int *data = array_random(seed, n);
     if (data == NULL) {
@@ -136,7 +137,6 @@ main(int argc, char **argv)
         goto out;
     }
 
-    MPI_Init(&argc, &argv);
 
     if (algs & ALG_LINEAR) {
         linear_block_size(block_size);
