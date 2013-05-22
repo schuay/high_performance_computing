@@ -78,14 +78,13 @@ srand(time(NULL) + getpid());
 MPI_Comm_split(MPI_COMM_WORLD, 1, rand(), &comm);
 \end{lstlisting}
 
+
+
 \begin{comment}
 TODO: "Estimate best block size using measured alpha and beta"??
 TODO: "Verify/falsify claims of lecture"
 TODO: "Estimate parameter ranges (processes, data sizes) for which algorithms are ideal.
-TODO: Random communicator??
-TODO: How to avoid performance problems (random communicators), which means MPI provides (NONE?)
 Show graphs.
-Best block sizes for linear/binary.
 \end{comment}
 
 <<results=tex, echo=FALSE>>=
@@ -94,5 +93,46 @@ plotResults("../results/bench.csv")
 @
 
 \section{Analysis}
+
+\subsection{Block Size}
+
+Assuming $\alpha = 1 \mu s, \beta = 0.002 \mu s / byte$ (taken from the benchmark graphs in the lecture slides),
+the optimal number of segments for the linear pipeline algorithm is
+
+\begin{displaymath}
+M = \sqrt{0.002m(p + 1)}
+\end{displaymath}
+
+For $m = 8000000 bytes, p = 576, M = 3038$, which evaluates to a block size of $2633$ bytes
+(or 329 integers). For $m = 111111111 \cdot 8, M = 32028$ with a block size of 3470 bytes
+or 433 integers.
+
+In order to determine an optimal block size, we benchmarked both pipelined
+algorithms with block sizes ranging from 512 integers (= 4096 bytes on a 64 bit system)
+to 65536 integers (= 524288 bytes).
+
+The results were somewhat surprising:
+small (512, 1024 integers) and large (65536 integers) block sizes performed well,
+while sizes such as 4096 integers caused heavy slowdowns.
+
+% TODO Best block sizes for linear/binary.
+% TODO: Graphs :(
+
+\subsection{Random Communicators}
+
+Again, results were surprising. Benchmarked times were completely identical to
+the ones determined with \lstinline|MPI_COMM_WORLD|.
+
+% TODO: Really? Repeat this.
+
+The main problem of random communicators is that the communication cost between processors
+is not equal. Some might be cheap (if they're located on the same node), while others are
+expensive. Effective algorithms need to take this into account and try to minimize the usage of
+slow network links.
+
+However, MPI does not provide any means to negate the performance problems of random communicators;
+there are no ways to determine properties of the network topology unless one relies
+on other, external methods. Within MPI itself, one has to rely on the communicator being
+well-formed, meaning that consecutive ranks lie next to each other in the network topology.
 
 \end{document}
