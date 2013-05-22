@@ -14,8 +14,8 @@
 #define DEFAULT_BLOCK_SIZE (1024)
 #define ROOT (0)
 
-#define SAFE_BENCH(name, fn, data, n, comm) do { \
-    if (bench(name, fn, data, n, comm) != 0) { \
+#define SAFE_BENCH(name, is_random, fn, data, n, comm) do { \
+    if (bench(name, is_random, fn, data, n, comm) != 0) { \
         ret = -1; \
         goto out; \
     } \
@@ -48,6 +48,7 @@ usage(void)
 
 static int
 bench(const char *name,
+      const int is_random,
       bcast_t bcast_fn,
       int *data,
       const int n,
@@ -68,7 +69,7 @@ bench(const char *name,
     MPI_Reduce(&local_elapsed, &total_elapsed, 1, MPI_DOUBLE, MPI_MAX, ROOT, comm);
 
     if (rank == ROOT) {
-        printf("%8s, %4d, %9d, %f\n", name, size, n, total_elapsed);
+        printf("%s%s,%d,%d,%f\n", name, is_random ? " (rand)" : "", size, n, total_elapsed);
     }
 
     return 0;
@@ -151,20 +152,20 @@ main(int argc, char **argv)
 
     if (algs & ALG_LINEAR) {
         linear_block_size(block_size);
-        SAFE_BENCH("linear", bcast_linear, data, n, comm);
+        SAFE_BENCH("linear", random_comm, bcast_linear, data, n, comm);
     }
 
     if (algs & ALG_BINOMIAL) {
-        SAFE_BENCH("binomial", bcast_binomial, data, n, comm);
+        SAFE_BENCH("binomial", random_comm, bcast_binomial, data, n, comm);
     }
 
     if (algs & ALG_BINARY) {
         binary_block_size(block_size);
-        SAFE_BENCH("binary", bcast_binary, data, n, comm);
+        SAFE_BENCH("binary", random_comm, bcast_binary, data, n, comm);
     }
 
     if (algs & ALG_NATIVE) {
-        SAFE_BENCH("native", bcast_native, data, n, comm);
+        SAFE_BENCH("native", random_comm, bcast_native, data, n, comm);
     }
 
 out:
