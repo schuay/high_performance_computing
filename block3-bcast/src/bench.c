@@ -33,7 +33,7 @@ typedef int (*bcast_t)(int *, int, int, MPI_Comm);
 static void
 usage(void)
 {
-    fprintf(stderr, "bcast_bench [-l] [-o] [-a] [-m] [-s seed] [-n length]\n"
+    fprintf(stderr, "bcast_bench [-l] [-o] [-a] [-m] [-s seed] [-n length] [-b blocksize]\n"
                     "   -a: Run the binary broadcast (Default: N)\n"
                     "   -l: Run the linear broadcast (Default: N)\n"
                     "   -m: Run the native MPI broadcast (Default: N)\n"
@@ -121,6 +121,10 @@ main(int argc, char **argv)
     }
 
     if (optind < argc) {
+        usage();
+    }
+
+    if (algs == 0) {
         usage();
     }
 
