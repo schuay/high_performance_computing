@@ -74,16 +74,12 @@ targets in our makefile. Results are then written to \verb|results/bench.csv|.
 Random communicators were created using the following code:
 
 \begin{lstlisting}
-srand(time(NULL) + getpid());
+srand(rank);
 MPI_Comm_split(MPI_COMM_WORLD, 1, rand(), &comm);
 \end{lstlisting}
 
-
-
 \begin{comment}
-TODO: "Estimate best block size using measured alpha and beta"??
 TODO: "Verify/falsify claims of lecture"
-TODO: "Estimate parameter ranges (processes, data sizes) for which algorithms are ideal.
 Show graphs.
 \end{comment}
 
@@ -92,7 +88,15 @@ Show graphs.
 plotResults("../results/bench.csv")
 @
 
-\section{Analysis}
+\section{Discussion}
+
+For small and medium data sizes, the binary tree algorithm
+wins fairly obviously over all processor counts. It is then superceded by both the pipelined
+linear and binomial algorithms for larger data sets.
+
+Our results show that a binary tree for data sizes of up to $8 \cdot 10^6$ bytes combined
+with a linear pipeline for larger volumes seems to be the best combination, outperforming
+the native \lstinline|MPI_Bcast| implementation at high thread counts and large data volumes.
 
 \subsection{Block Size}
 
@@ -111,19 +115,28 @@ In order to determine an optimal block size, we benchmarked both pipelined
 algorithms with block sizes ranging from 512 integers (= 4096 bytes on a 64 bit system)
 to 65536 integers (= 524288 bytes).
 
-The results were somewhat surprising:
+The experimental results were somewhat surprising:
 small (512, 1024 integers) and large (65536 integers) block sizes performed well,
 while sizes such as 4096 integers caused heavy slowdowns.
 
-% TODO Best block sizes for linear/binary.
+We chose a block size of 1024 integers (= 4096 bytes) for both algorithms
+since they performed the best in practice.
+
 % TODO: Graphs :(
 
 \subsection{Random Communicators}
 
-Again, results were surprising. Benchmarked times were completely identical to
-the ones determined with \lstinline|MPI_COMM_WORLD|.
+<<results=tex, echo=FALSE>>=
+plotResults("../results/rbench.csv")
+@
 
-% TODO: Really? Repeat this.
+\vspace{3mm}
+
+The extra network cost incurred by the use of random communicators is mostly noticeable in the
+performance of linear and binomial algorithms with low to medium data volumes. While all
+runtimes suffer, these two algorithms suddenly increase by an order of magnitude for
+data sizes of up to $8 \cdot 10^6$ bytes. This makes sense, since both exploit network proximity
+between nodes far more than the binary tree algorithm does.
 
 The main problem of random communicators is that the communication cost between processors
 is not equal. Some might be cheap (if they're located on the same node), while others are
