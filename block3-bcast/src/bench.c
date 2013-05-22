@@ -33,14 +33,15 @@ typedef int (*bcast_t)(int *, int, int, MPI_Comm);
 static void
 usage(void)
 {
-    fprintf(stderr, "bcast_bench [-l] [-o] [-a] [-m] [-s seed] [-n length] [-b blocksize]\n"
+    fprintf(stderr, "bcast_bench [-l] [-o] [-a] [-m] [-s seed] [-n length] [-b blocksize] [-r]\n"
                     "   -a: Run the binary broadcast (Default: N)\n"
                     "   -l: Run the linear broadcast (Default: N)\n"
                     "   -m: Run the native MPI broadcast (Default: N)\n"
                     "   -o: Run the binomial broadcast (Default: N)\n"
                     "   -s: The seed used for generating test data (Default: %d)\n"
                     "   -n: The length of the generated test array (Default: %d)\n"
-                    "   -b: The block size of pipelined algorithms (Default: %d)\n",
+                    "   -b: The block size of pipelined algorithms (Default: %d)\n"
+                    "   -r: Use a random communicator (Default: N)\n",
             DEFAULT_SEED, DEFAULT_N, DEFAULT_BLOCK_SIZE);
     exit(EXIT_FAILURE);
 }
@@ -80,10 +81,11 @@ main(int argc, char **argv)
     int seed = DEFAULT_SEED;
     int n = DEFAULT_N;
     int block_size = DEFAULT_BLOCK_SIZE;
+    int random_comm = 0;
     int ret = 0;
 
     int opt;
-    while ((opt = getopt(argc, argv, "loamb:s:n:")) != -1) {
+    while ((opt = getopt(argc, argv, "loamb:s:n:r")) != -1) {
         switch (opt) {
         case 'b':
             block_size = strtol(optarg, NULL, 10);
@@ -115,6 +117,9 @@ main(int argc, char **argv)
         case 'm':
             algs |= ALG_NATIVE;
             break;
+        case 'r':
+            random_comm = 1;
+            break;
         default: /* '?' */
             usage();
         }
@@ -128,8 +133,10 @@ main(int argc, char **argv)
         usage();
     }
 
-    /* TODO: Non-well behaved communicator benchmarks. */
     MPI_Init(&argc, &argv);
+    MPI_Comm comm = MPI_COMM_WORLD;
+    int rank;
+    MPI_Comm_rank(comm, &rank);
 
     int *data = array_random(seed, n);
     if (data == NULL) {
@@ -137,26 +144,34 @@ main(int argc, char **argv)
         goto out;
     }
 
+    if (random_comm) {
+        srand(rank);
+        MPI_Comm_split(MPI_COMM_WORLD, 1, rand(), &comm);
+    }
 
     if (algs & ALG_LINEAR) {
         linear_block_size(block_size);
-        SAFE_BENCH("linear", bcast_linear, data, n, MPI_COMM_WORLD);
+        SAFE_BENCH("linear", bcast_linear, data, n, comm);
     }
 
     if (algs & ALG_BINOMIAL) {
-        SAFE_BENCH("binomial", bcast_binomial, data, n, MPI_COMM_WORLD);
+        SAFE_BENCH("binomial", bcast_binomial, data, n, comm);
     }
 
     if (algs & ALG_BINARY) {
         binary_block_size(block_size);
-        SAFE_BENCH("binary", bcast_binary, data, n, MPI_COMM_WORLD);
+        SAFE_BENCH("binary", bcast_binary, data, n, comm);
     }
 
     if (algs & ALG_NATIVE) {
-        SAFE_BENCH("native", bcast_native, data, n, MPI_COMM_WORLD);
+        SAFE_BENCH("native", bcast_native, data, n, comm);
     }
 
 out:
+    if (random_comm) {
+        MPI_Comm_free(&comm);
+    }
+
     MPI_Finalize();
     free(data);
 
