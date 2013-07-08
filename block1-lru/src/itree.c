@@ -324,6 +324,8 @@ _itree_descend_r(const uint64_t index,
         }
     }
 
+    const int below_merge = (util->u != NULL);
+
     /* Index was added as a new descendant node. */
     if (util->u == NULL && util->u != droot) {
         droot->v++;
@@ -339,7 +341,7 @@ _itree_descend_r(const uint64_t index,
     }
 
     /* Adjust the subtree sum after a merge. */
-    if (util->l != NULL && util->l != droot) {
+    if (util->l != NULL && util->l != droot && below_merge) {
         droot->v -= util->l->k2 - util->l->k1 + 1;
     }
 
