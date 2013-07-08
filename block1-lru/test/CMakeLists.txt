@@ -13,5 +13,5 @@ target_link_libraries(hash_test ${CHECK_LIBRARIES})
 add_test(hash_test ${CMAKE_CURRENT_BINARY_DIR}/hash_test)
 
 add_executable(stackdist_test stackdist.c ${CMAKE_SOURCE_DIR}/src/stackdist.c)
-target_link_libraries(stackdist_test ${CHECK_LIBRARIES} stackdist)
+target_link_libraries(stackdist_test ${CHECK_LIBRARIES} stackdist naive)
 add_test(stackdist_test ${CMAKE_CURRENT_BINARY_DIR}/stackdist_test)

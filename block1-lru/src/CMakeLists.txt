@@ -8,6 +8,10 @@ add_library(stackdist
     stackdist.c
 )
 
+add_library(naive
+    naive.c
+)
+
 add_executable(lru-misses
     lru-misses.c
     naive.c
